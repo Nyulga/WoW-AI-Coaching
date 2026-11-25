@@ -1,2 +1,3 @@
 /docs/verif/
 /.ztp/evidence/
+.env*.local
