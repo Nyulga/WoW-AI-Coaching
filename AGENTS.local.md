@@ -1,4 +1,4 @@
-# Warcraftlog 2 — settings and conventions
+# WoW AI Coaching — settings and conventions
 
 **This file is yours. `install.sh` never overwrites it, and `/ztp-setup` is its only creator.**
 `AGENTS.md` belongs to the method and is rebuilt on every update — write nothing there.
