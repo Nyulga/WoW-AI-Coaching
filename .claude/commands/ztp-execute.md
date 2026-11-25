@@ -1,0 +1,71 @@
+---
+description: Get a story implemented in an isolated subagent. Never codes in the main context.
+argument-hint: <story id or name>
+allowed-tools:
+  - Read
+  - Glob
+  - Agent
+  - Write
+  - Bash
+---
+# ztp-execute — Delegated implementation
+
+Target story: $ARGUMENTS
+
+## Execution contract (non-negotiable)
+You MUST complete this command by delegating to the `implementer` subagent. You are FORBIDDEN from:
+- Writing or modifying code yourself. Your only write is correction bookkeeping in docs/reviews/<id>.md under /ztp-review's Fix policy.
+- Starting the implementation without a validated plan in docs/plans/<id>.md.
+- Running a story from the repository base directory, whatever its complexity.
+- Creating or checking out the story branch in the repository base directory.
+- Summarizing work the agent didn't actually do.
+
+If you can't invoke the Agent tool, stop and report the error. Don't improvise.
+
+## Workflow
+
+### Step 1 — Prerequisites (fail-closed)
+1. Resolve $ARGUMENTS using AGENTS.md, "Work sources"; no unambiguous story or ticket brief → STOP.
+2. Resolve `<repository-base>/.worktrees/<id>` and verify its branch is exactly `feature/<id>`. Missing worktree, wrong branch, detached HEAD or the repository base directory itself → STOP and run `/ztp-research <id>` to bootstrap the feature workspace. Never improvise another branch or path.
+3. From that worktree, read docs/plans/<id>.md. If it doesn't exist, STOP: ask for /ztp-plan <id> first. Go no further.
+4. Check the plan's frontmatter: it must contain `validated: yes`. Otherwise STOP: "Plan not validated. Review it, then rerun /ztp-plan <id> to validate."
+5. Read docs/reviews/<id>.md from the worktree if it exists. Apply `/ztp-review`, "Fix policy", including current settings and persisted counts. `critical` or `major` means a FIX run; `review` returns to /ztp-review without another implementation; `stop` stops. `none` means no correction is due: point to Ship instead of replaying the implementation. An explicit story exit-gate failure from /ztp-ship is a critical correction request: preserve its failing command/error in the report, invalidate the old pass (`Ship allowed: no`), and apply the same remaining critical budget.
+6. Read AGENTS.local.md: the project commands (`Test`, `Test focused`, `Typecheck`, `E2E`, `Build`), `Test budget`, `Test validation`, and the stages (`Full suite`, `E2E stage`, `Build stage`). Missing file → STOP: "No project settings. Run /ztp-setup." A command left at `—` is one the implementer must not invent: pass it along as unavailable.
+
+### Step 2 — Acceptance tests, then code
+The story runs in three moves. A FIX run skips 2a and 2b: the tests are already frozen.
+
+**Before 2a — the plan's acceptance-tests check.** Run `ztp-gate acceptance-tests <id>` in the
+worktree. A failure → STOP: show what failed and send the plan back to /ztp-plan <id>. No
+implementer is invoked.
+
+**2a — Acceptance tests.** Skip when docs/tests/<id>.md already says `validated: yes`.
+Otherwise delegate as below with `mode: tests`: the implementer writes one test per acceptance
+criterion and their skeletons, proves each red on its assertion, and commits them alone.
+
+**2b — Test validation, per `Test validation`.**
+- `agent` (default): invoke the Agent tool, subagent_type `reviewer`, in the same worktree,
+  prompt: `mode: tests` — judge the acceptance tests of story <id> and write the verdict in
+  docs/tests/<id>.md.
+- `human`: show the criterion → test table and the red runs, and ask via AskUserQuestion:
+  "Freeze these tests?" — Validate / Modify / Stop. Only Validate writes `validated: yes`.
+Not validated → back to 2a once, with the findings; refused a second time → STOP and ask.
+
+**2c — Code.** Delegate as below with `mode: code`. A `Test contested` report stops the run:
+back to 2a for that test, then 2b — a changed test is a new `test(<id>)` commit, validated again.
+
+On a FIX run, reserve the attempt and commit the report exactly as `/ztp-review`, "Starting
+a correction", specifies. This is also required when Flow or Orchestrator delegates directly;
+one attempt has one history row, never a second row for the same delegation.
+Invoke the Agent tool:
+- subagent_type: implementer
+- description: Implement story <id>
+- working directory: the absolute dedicated worktree path verified in Step 1.
+- prompt: `mode: <tests|code>` — Implement story <id> from docs/plans/<id>.md. Your agent definition is your contract — this prompt carries only what is specific to this run. The worktree and branch are prepared and verified: do not create a worktree, switch branches, checkout, or stash. The project commands, `Test budget` and the stages live in AGENTS.local.md — quote them verbatim, and one left at `—` does not exist in this project.
+- On a FIX run, add: Correction requested for story <id> (<critical|major> trigger). docs/reviews/<id>.md is your fix list; your definition says how to work it. Preserve its Fix history; the caller owns the attempt bookkeeping.
+Wait for the agent to finish. Capture its summary.
+
+### Step 3 — Report
+Summarize: tasks done, files touched, tests added, what the verification record says (commands, exit codes, tree), any blocker the agent reported, and used/allowed correction counts. Leave the attempt `started` until its review completes; a successful implementation alone does not clear it. No line-by-line detail.
+
+End with: "Implementation done. Next step: /ztp-review <id>"

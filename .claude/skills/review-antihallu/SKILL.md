@@ -1,0 +1,95 @@
+---
+name: review-antihallu
+description: Detects agent hallucinations in generated code — invented APIs, plausible-but-wrong logic, drift from the plan. Preloaded in the reviewer subagent, and the single home of the review procedure.
+---
+# Anti-hallucination review
+
+An agent produces plausible code. Plausible ≠ correct. This review hunts for the gap, and a
+fresh context spots it better than the agent that wrote the code.
+
+## Verification procedure (do it, don't skim)
+
+**Scope.** Apply these steps to the diff supplied by the caller. A correction scope judges
+only that correction and affected callers: compare against the reported defects and relevant
+plan tasks, prove the invariants it changes, and inspect its regressions. Read surrounding
+code as needed; do not repeat the full story audit or proofs for untouched invariants. Keep
+previous open findings with their severity until closure is evidenced, and report new findings
+within scope. Scope never relaxes the verification-record check or permits a hidden critical.
+
+**1. Establish what already passed, before running anything.** The implementer wrote
+`docs/verif/<id>.md`: the commands it ran, their exit codes, and the `Tree:` they covered.
+Check it with `ztp-gate verif-current <id>` — or `git diff --quiet <Tree> HEAD -- .
+':(exclude)docs'` where the hook isn't installed. It also runs `verif-clean`: anything in
+`docs/verif/` other than root `.md` records fails it — a **major** finding naming the files to
+move to `.ztp/evidence/<id>/` (without the hook: `find docs/verif -mindepth 1 \( -type d -o !
+-name '*.md' \)` must print nothing).
+
+- **Current** (exit 0, `Verification status: complete`, every recorded exit code 0) → the
+  suite and the type check are proven for this exact code. Do not re-run them; say in the
+  report what you took from the record, and read its "Not proven here" section.
+- **Missing, incomplete, stale, or any non-zero exit code** → run them yourself and say why.
+  The record is local and never committed: a fresh clone or a CI run has none, and that is
+  this case, not an error.
+
+"Tests pass" written in prose is a claim; a record whose tree matches the commit is a fact.
+That is the whole difference. Fail-closed: an absent record is never a pass.
+
+**Do not run the production build or the end-to-end suite** — they run at ship (`Build stage`,
+`E2E stage`). One exception: a diff that moves a route, a manifest or the packaging configuration, the rupture a type check
+structurally cannot see. **Take the linter, the formatter and any dead-code scan as reported**:
+they were proven by the implementer, cannot change silently since, and CI runs them anyway.
+
+**2. Open every reference.** For each import, function call, API and config key in the diff:
+open the target and verify it exists — exact name, exact signature, exact location. Invented
+references are the #1 agent failure.
+
+**3. Diff vs plan, task by task.** Every plan task actually present? Anything in the diff the
+plan never asked for? Drift in either direction is a finding. A diff that contradicts a
+verified fact of the research, or an accepted ADR in `docs/decisions/`, is a finding too.
+
+**4. Read the tests like production code.**
+
+*Check the freeze.* `ztp-gate tests-frozen <id>` must pass — or, without the gate installed:
+`git log -1 --format=%H --fixed-strings --grep='test(<id>): acceptance tests'`, then
+`git diff --quiet <that sha> HEAD -- <the frozen files of docs/tests/<id>.md>`. A frozen test edited, skipped,
+loosened or deleted after validation is **critical**, whatever the reason given.
+
+*Judge the net.* Look for a test that names an invariant without exercising it. Check the
+FIXTURES and the mock doubles, not only the assertions — a fixture whose identifier lets a
+downstream guard answer for the guard under test, or a double that replays a clause instead of
+evaluating it, both read as correct and prove nothing. Reject decorative tests: CSS classes,
+DOM structure, static labels, prop echoes and inventories are not coverage.
+
+*Judge the volume.* `Test budget` per story, the only budget — an override the plan declares is a finding, never a justification. A permission
+matrix replayed per command, an enum tested exhaustively, an adapter re-asserting an access refusal the
+policy already owns — each is a finding, classified minor, and worth naming because CI time
+is a real cost. **The same for the story's end-to-end spec**, against the doctrine's
+end-to-end rules: a spec that only asserts something is visible, a matrix (locales, themes,
+viewports, devices, routes), a selector on copy that can change, a scenario a unit test already
+covers, an edit to another story's spec the record does not justify — each a minor finding,
+named with its `file:line`.
+
+*Spot-check the bite.* The acceptance tests were proven red and frozen before the code — that
+is the main guarantee. Pick the one invariant the story turns on (a guard, predicate, state
+transition or query clause) and neutralize it once: invert the condition, return the opposite
+constant, drop the clause. **Run only the test files that name that invariant — never the
+whole suite**: a neutralized guard turns red where it is tested, and replaying the project to
+learn it is the most expensive habit a review can have. COUNT the red tests, then restore and
+prove the tree is clean (`git diff --exit-code` on the file) before writing a line of report.
+Report what you neutralized and how many went red. **Zero red on a neutralized invariant means
+it is untested**, whatever the suite's total says — a finding, not a detail. A presentation-only
+change needs its rendered evidence, not a forced mutation. An unrestored mutation is a worse
+defect than the one you were hunting.
+
+**5. Hunt plausible-but-wrong logic**: values that look right — defaults, formats, status
+codes, edge conditions — but were never checked against reality.
+
+**6. Regressions**: what else uses the touched code paths? Open it.
+
+## Severity scale
+
+- **critical** — ships a bug, a security hole, an invented API, or breaks existing behavior.
+  Blocks the ship.
+- **major** — real defect or rule violation, but scoped and not silently corrupting anything.
+  Ship allowed in the review verdict; the caller's Fix policy decides whether to correct now.
+- **minor** — style, naming, small cleanups.

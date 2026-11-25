@@ -1,0 +1,73 @@
+---
+description: Break a story into sequenced tasks, ready to execute
+argument-hint: <story id or name>
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - AskUserQuestion
+  - Bash
+---
+You are planning a story's implementation. Target story: $ARGUMENTS
+
+Resolve $ARGUMENTS using AGENTS.md, "Work sources"; ambiguity or a missing story/ticket brief stops.
+
+Locate the dedicated `.worktrees/<id>` worktree, verify that it is on exactly
+`feature/<id>`, and perform every read and write there. Missing worktree, wrong
+branch, detached HEAD or the repository base directory itself → STOP and run
+`/ztp-research <id>` first. Never create or switch branches here.
+
+Read: the resolved work source, docs/research/<id>.md (if it exists), docs/design-system.md and docs/designs/<id>/design.md (if they exist), docs/architecture.md, AGENTS.md
+Output structure: @templates/plan.md
+
+Apply the `testing-doctrine` skill when you write the test strategy.
+
+If docs/research/<id>.md doesn't exist, point out that /ztp-research <id> is recommended before planning — without research, the plan relies on possibly stale docs. Continue only if I confirm.
+
+If the story has UI, the plan follows the screen defined in docs/designs/<id>/design.md: it references the design system's components and never invents new ones. The HTML mockup is a reference, not a source of code.
+
+**A story with a screen is planned only on a validated design (fail-closed).** `ztp-gate design-validated <id>` — or, without the hook, docs/designs/<id>/design.md must exist with `validated: yes` in its frontmatter. Missing → STOP: "No design for this story. Run /ztp-design <id>." Present but not validated → STOP: "Design not validated. Rerun /ztp-design <id> to validate it." Write no plan before it passes.
+
+Proceed as follows:
+1. Isolate the target story and its acceptance criteria.
+2. Break it into ordered tasks, each one small and verifiable. Lean on the
+   research: real files, verified APIs, known traps. A behavior, business rule,
+   data contract or interaction must name the test that can fail. A purely
+   presentational task may instead name a focused visual check (per `UI check`) plus
+   lint and typecheck; never manufacture a component test merely so every task
+   owns one. A component task names a component test only under the `testing-doctrine`
+   component-test rule, and says how it meets each of the three conditions; otherwise it names
+   its `UI check`.
+**Cap the plan at ~250 lines.** The decisions table stays whole — it is what stops the
+implementer re-deciding — but the prose around it need not argue twice.
+
+**The only budget is `Test budget` in AGENTS.local.md (25 when absent).** A plan never declares its own budget or an override — not "Budget: 40", not anyone's exception, not one copied from an earlier plan. A story that needs more tests stops: the plan says so, and is not validated. Raising the budget is a change to AGENTS.local.md, made by its owner, outside the plan.
+The permission matrix is written ONCE, in the policy test; a service test covers the
+business rule, not the access rule again. No enum exhaustiveness, never the same rule at
+two layers, and no adapter re-asserting an access refusal. Full rationale in the `testing-doctrine` skill —
+volume has repeatedly grown by dozens of tests per story while the central
+invariant shipped with no net at all.
+
+3. Map every acceptance criterion to exactly one test in the plan's "Acceptance tests" table —
+   criterion id, test file and name, layer — or to its `UI check` for a purely visual
+   criterion. That table is what the implementer writes first and what the test review checks.
+   Anticipate the touched files and the test strategy. Test each invariant at
+   the closest valuable layer and avoid proving the same behavior again in
+   every caller. Explicitly separate automated behavior tests from visual
+   verification. If the story is scored complexity 5, or the plan grows past
+   roughly ten tasks, the story is too big: say so and suggest a split instead
+   of a bloated plan.
+4. If planning forces a structural choice (library, pattern, data model) with rejected alternatives, record it as an ADR in `docs/decisions/` (@templates/adr.md) — it will travel with the story branch.
+5. Write the plan to `docs/plans/<id>.md`, frontmatter `validated: no`.
+6. **Acceptance-tests check (fail-closed).** Run `ztp-gate acceptance-tests <id>`: exactly one row per criterion of the work source, none missing, none for a criterion it does not list, and no more test rows than `Test budget` — a purely visual criterion's row says `UI check`. A failure means no `validated: yes`, under either setting: show what failed, leave the plan `validated: no`, and stop. Fix the table, or — if the story genuinely needs more — say so and stop.
+7. Validation, per `Plan validation` in AGENTS.local.md (missing file or setting → STOP: "No project settings. Run /ztp-setup."):
+   - `human` — checkpoint (AskUserQuestion): "Validate this plan?" — options: Validate / I'll review it first. On Validate, set `validated: yes` in the plan's frontmatter.
+   - `autonomous` — no checkpoint: re-read the plan against the story's acceptance criteria, then set `validated: yes` yourself. State plainly that nobody else looked at it.
+   /ztp-execute refuses an unvalidated plan either way.
+
+If the plan file already exists when the command runs, skip straight to step 6: the check, then the validation checkpoint.
+
+Write no code. This command produces a plan, not code.
+
+End with: "Plan validated. Next: /ztp-execute <id>" — or "Plan awaiting validation. Rerun /ztp-plan <id> to validate." if it wasn't validated.

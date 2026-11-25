@@ -1,0 +1,452 @@
+# zero-to-prod — Repo rules
+
+**This file belongs to the method and is rebuilt on every `install.sh` run — anything written
+here is lost.** What is specific to this project — settings, project commands, conventions —
+lives in `AGENTS.local.md`, which the installer never overwrites and appends below these
+rules. `/ztp-setup` creates it. **After editing it by hand, rerun `install.sh`**: pipeline
+settings are read straight from it and take effect at once, conventions only reach an agent
+through this assembled file.
+
+**The project's nature is settled once.** The "Project profile" block of `AGENTS.local.md` —
+`Product type`, `Target environment`, `UI check`, `E2E tool` — is written by `/ztp-architect`
+and read by every agent. Never ask again what it answers, and never propose a tool or a check
+it does not name: no browser test on a product without a browser, no screen opened when
+`UI check` is `—`.
+
+**A rule here applies to every project. A value that varies is read from `AGENTS.local.md`** —
+never decided by the agent; only an explicitly documented compatibility default applies when
+missing. Read it there, not in the prose above it: one setting per line, `Name: value`, the value being everything after the colon,
+trimmed. A value of `—` means the project does not have that thing; say so rather than
+substituting one.
+
+## When the workflow takes too long or costs too much
+
+Inspect the available session/tool logs, reviews, verification records and `AGENTS.local.md`.
+Attribute measured time or cost to correction loops, repeated checks, end-to-end scope,
+infrastructure or waiting; distinguish facts from hypotheses and name missing evidence.
+Present **all supported cost controls**, including those worth keeping, in a compact table:
+setting or budget, current value, available values, expected saving, and coverage or quality
+trade-off. Use the installed method's documented settings and accepted values; label estimates
+and unknowns rather than inventing timings, savings or knobs. Recommend the adjustment that
+addresses the observed cause and explain why; prioritize removing redundant work. A defect or
+runtime failure may need a fix instead of a lower budget. Include `Fix level`, `Critical fix loops`
+and `Major fix loops`, with attempts used/allowed, triggers and measured duration when available.
+Offer the choices together — change A, B, C, or keep the settings — with a clear recommendation.
+Apply agreed changes in
+`AGENTS.local.md`, respecting authorization already given; a complaint alone authorizes analysis
+and proposals. Track eligibility, severity definitions and mandatory gates still apply.
+
+## Absolute rule
+No direct coding. Every feature goes through the zero-to-prod pipeline, in order:
+
+Setup → PRD → User Stories → Stories Review → Architecture (foundation + deployment) → Design System (UI only) → then, per story: Research → Design → Plan → Execute → Review → Ship
+
+`/ztp-setup` is not a phase of the cycle: it writes the project's settings once, and every command below reads them.
+
+No code is written before the story has a validated plan (`/ztp-plan`). No feature ships before a passed review (`/ztp-review`).
+
+### A request in plain words — propose the lane, never start one
+
+A request that is not a `/ztp-*` command is not a go-ahead for a cycle. Before creating a
+worktree or a branch, writing a plan or running a command, say which lane you would take and
+why — Quick Fix, `/ztp-chore`, or a story (`/ztp-flow`, `/ztp-orchestrator`) — and ask the human
+(AskUserQuestion where available). Nothing starts before the answer. A question — explain,
+analyze, compare — changes nothing and needs no lane.
+
+Two exceptions only: the human typed the command; or they said beforehand, in this session, to
+run named stories or a backlog autonomously. That covers the work they named, not whatever
+comes up next.
+
+### Quick Fix mode — the one exception
+
+**Only once the human has chosen it** — proposed by you as above, or asked for by name — and only for a small, local, well-understood,
+easily reversible adjustment: a color, spacing, radius, font size or button style; short UI
+copy or a translation; a layout or responsive nudge; restoring an existing presentation
+affordance. The primary agent implements it directly — it may use a subagent to investigate
+or review, never to implement.
+
+**It does not apply** to a new feature, a shared-component redesign, a data model or
+migration, an API or contract change, authorization, security, business rules, persistence,
+a cross-cutting refactor, a dependency change, or anything whose impact is uncertain. Too
+large, or investigation reveals one of these → stop Quick Fix, recommend the pipeline, and
+write no more code until the work has passed the right stages.
+
+Announce the mode and its exact scope before editing, keep the diff minimal, preserve
+existing abstractions, and verify proportionately — at minimum a focused lint, typecheck,
+existing test, or a look at the screen.
+
+**Base directory, on `Target branch` from `AGENTS.local.md`, never a worktree or a feature branch.** Another branch
+checked out → stop and ask; never switch automatically. Another agent owning the directory →
+coordinate or stop; never overlap edits.
+
+## Pipeline (commands)
+
+Framing, once per product: `/ztp-setup` (settings, first) → `/ztp-prd` → `/ztp-stories` →
+`/ztp-stories-review` → `/ztp-architect` (stack, verified foundation, environments and deployment) →
+`/ztp-design-system` (products with a user interface only).
+
+Per story: `/ztp-research` → `/ztp-design` (UI only) → `/ztp-plan` → `/ztp-execute` →
+`/ztp-review` → `/ztp-ship`. Each command's own file states its contract.
+
+Short track: **`/ztp-flow`** runs that same cycle in three contexts instead of six — research
+and plan fused in one pass, then the same `implementer`, the same fresh-context `reviewer`,
+the same ship. Nothing is relaxed: dedicated worktree, validated plan, frozen acceptance tests, neutralization spot check,
+`Ship allowed` gate, test budget.
+
+Utilities: `/ztp-orchestrator` (the whole cycle, with its human checkpoints),
+`/ztp-status` (state derived from the files), `/ztp-help`,
+`/ztp-chore` (work that changes no product behavior: a short validated plan, the implementer,
+a verification sized to what changes, no review), `/ztp-test-prune` (a chore that prunes an
+existing end-to-end suite to the doctrine).
+
+After initial framing, a new product change starts with `/ztp-intent`, then an additive
+`/ztp-stories` breakdown. Ship hands production evidence to `/ztp-ops`; findings return as
+tickets or intent interviews. Initial PRD, defects, chores and Quick Fix need no intent.
+Optional: `/ztp-review-learn` (human-approved project review rules), `/ztp-eval` (regression
+tasks for the agent configuration). Neither changes the story cycle's gates or test doctrine.
+
+**Run the commands. Never hand-roll the agent call.** They carry what the pipeline has
+learned — fix mode, the subagent definitions, the gates. A briefing written by hand replaces
+all of it with an opinion. Parallel stories are several commands, never several prompts.
+
+One feature = one cycle = one branch = one PR. `Story track` in `AGENTS.local.md` picks the
+track: `full`, `flow`, or `auto` (`flow` at or below `Flow threshold`, `full` above it).
+Whatever the track, a migration, a genuinely new screen, an authorization or tenant-scope
+change, an API contract change or an added dependency belongs to `full` — and escalates
+there mid-flight if that is when the code reveals it. **The track changes how many contexts
+read the story, never which gates it passes.**
+
+## Where work happens
+
+Three modes, and **a complexity score never chooses the directory** — it only chooses the track:
+
+| Mode | Working directory | Branch |
+| --- | --- | --- |
+| Explicit Quick Fix | Repository base directory | `Target branch`; another branch checked out → stop and ask |
+| Feature / story | Dedicated `.worktrees/<story-id>/` worktree | Exact `feature/<story-id>` |
+| Chore (`/ztp-chore`) — no product behavior changes: docs, content, tests, tooling | Dedicated `.worktrees/<id>/` worktree | Exact `chore/<id>` |
+
+Every change not explicitly announced and eligible as a Quick Fix, and not a chore, is a feature, and a feature
+stays in its worktree from the first phase to the last, whatever its complexity. Never create
+or check out a feature branch in the repository base directory.
+
+**The method says where the work happens, not how the workspace is built.** The entry command
+— `/ztp-research` or `/ztp-flow` — creates or verifies the worktree, through a
+`worktree-manager` subagent when the environment provides one, otherwise with plain
+`git worktree add`. Either way it imports the untracked local configuration files (`.env*` and the like), installs
+dependencies, and sets up the story's own runtime per the `story-sandbox` skill — then
+**never runs a baseline test suite**: the default branch's state is
+not this story's problem.
+
+Every later phase resolves the absolute path and verifies the exact branch. Missing worktree,
+wrong branch, detached HEAD or a second branch name is a hard stop — never `git switch`,
+`checkout`, `stash`, or an `-isolated` suffix.
+
+One agent, one working directory. While an agent owns one, no second agent and no main
+context edits, checks out or stashes in it.
+
+## What is a story, and what is not
+
+`docs/stories.md` holds the **product perimeter** — the breakdown `/ztp-stories` produced and
+`/ztp-stories-review` validated. A story is a new capability.
+
+**A defect is not a story.** A bug, a stale assertion, a screen that renders wrong, a footgun
+— it goes to the issue tracker. Putting it in `docs/stories.md` inflates the perimeter with
+work nobody scoped, and `/ztp-status` then counts it as product left to build. **A review
+finding stays in its review report** unless a human decides otherwise: it is already traced
+there, with its `file:line`.
+
+## Story ids and branches
+- Every story has an id: `s<number>-<short-slug>` (e.g. `s01-submit-testimonial`). It is assigned in docs/stories.md and reused verbatim everywhere: `docs/research/<id>.md`, `docs/plans/<id>.md`, `docs/reviews/<id>.md`, branch `feature/<id>`.
+- All work on a story happens on `feature/<id>`, branched from the default branch. Never commit story work to the default branch.
+- The story diff = `git diff <default-branch>...feature/<id>`. Review judges it, except for a correction review explicitly scoped by `/ztp-review`.
+- A command resolves its target using the work-source contract below; ambiguity always stops.
+
+### Work sources
+A product story resolves against `docs/stories.md`. A defect resolves against its execution
+brief in `docs/tickets/<id>.md`, including briefs in existing dedicated worktrees. Never add
+it to the product perimeter. The brief supplies the same criteria, complexity and dependencies.
+At entry only (`research`, `flow`, `orchestrator`), `ticket:<reference>` reads the canonical
+ticket through the configured `Issue tracker` access. Missing access or unclear expected
+behavior → stop for triage. Score complexity from the verified scope. Reuse its existing work id; otherwise allocate the next unused
+`s<number>-fix-<slug>` across stories, tickets and worktrees. After workspace bootstrap, write
+the brief there using `templates/ticket.md`, with source/revision and no invented requirement.
+The tracker remains authoritative; refresh at entry, flag changed scope for plan validation.
+Later phases read that verified brief in place of the target story; a bare unknown id stops.
+Before a brief exists, any handoff forwards the original `ticket:<reference>`, not a new id.
+This changes the cycle's input only: same branch/worktree, escalation rules, plan and review
+gates, testing and ship. A defect never needs an intent or a new PRD.
+
+## Gate (mechanical)
+- The review report `docs/reviews/<id>.md` must end with the exact lines `Max severity: <critical|major|minor|none>` and `Ship allowed: <yes|no>`. A single critical = no.
+- `/ztp-ship` refuses to run unless that file exists and contains the line `Ship allowed: yes`. No file, no line, or `no` → ship blocked. No exceptions.
+- **A critical always blocks.** `Fix level`, `Critical fix loops` and `Major fix loops` govern correction attempts; `/ztp-review`, "Fix policy", owns their decision and history contract. A loop is a correction plus its review, excluding the initial implementation/review. Exhausting a budget never clears a critical; residual majors stay in the report. A requested correction must finish its review before Ship.
+- Before the story commit the implementer writes `docs/verif/<id>.md` (@templates/verification-record.md) — local, gitignored, never committed: the commands it ran, their exit codes, and the `Tree:` those runs covered. `ztp-gate verif-current <id>` answers one question mechanically — does that record still describe the committed code, same tree outside `docs/`? With `Verification mode: record` — also what a missing or `—` setting means; only `rerun` replays — the review takes a current record as proof and does not re-run the suite or the type check. Missing, incomplete or stale → the reviewer runs them itself. An absent record is never a pass.
+- A plan executes only if its frontmatter says `validated: yes` — set by the human validation checkpoint (/ztp-plan or the orchestrator), never by the file merely existing. /ztp-execute is fail-closed on it.
+
+## Ship strategy
+Read `Merge mode`, `Target branch` and `Ship confirmation` from `AGENTS.local.md`.
+
+- `Merge mode: pr` — /ztp-ship opens a PR against the target branch. With `Ship confirmation: human` it stops there and merging is a human decision (review on GitHub, protected branch, CI); rerun /ztp-ship after the merge to deploy, smoke-test and clean up. With `automatic` it squash-merges and deploys right after the gate.
+- `Merge mode: local` — no PR: /ztp-ship squash-merges the story into the target branch locally, for a solo flow with no review platform. `Ship confirmation: human` still asks before merging.
+
+Whatever the mode, the merge is a **squash**: one story, one commit on the target branch.
+
+**A merge is not a ship: production is.** After a proven merge, `/ztp-ship` follows
+`docs/deployment.md` — written once by `/ztp-architect` — to deploy, then runs the smoke test
+against production. A red smoke test means the story is not shipped: the documented rollback
+runs (asked first under `Ship confirmation: human`), and the defect goes to the issue tracker.
+No `docs/deployment.md`, or an open point that blocks the deployment → `/ztp-ship` stops after
+the merge and says so; it never improvises a deployment.
+
+## Design
+
+`Design source` in `AGENTS.local.md` is a project decision, never a per-story one: `internal`
+(the agent draws, through `Design skill` when named) or `external` (a brief goes to
+`Design tool`, the result comes back). The system lives in `docs/design-system.md` (showcases in `docs/design/`), each
+story's design in `docs/designs/<id>/`, and **the repository is authoritative** — anything
+reworked in an external tool comes back before implementation.
+
+Three rules everyone downstream needs:
+- **A new screen gets one visual artifact; a derived screen gets none.** A mockup is a
+  reference, never code to copy — implementation uses the project's real components.
+- **Never invent a component or token outside the design system.** A need it does not cover
+  is a gap to report, never to fill freestyle.
+- **Nothing is measured outside `/ztp-design-system`** — no contrast ratios, font sizes,
+  rendered widths, positions or `Δx`, and never as a test assertion. Downstream, look for
+  what is BROKEN.
+
+Stories without UI skip `/ztp-design`; a product without a user interface skips `/ztp-design-system`
+as well. "Rendered" means opened the way `UI check` says — a browser, a device simulator, a
+device. Full doctrine: the `design-doctrine` skill.
+
+## Data & docs lifecycle
+Pipeline artifacts live in markdown under docs/, versioned by git; tracker-backed intents
+use a local pointer to the canonical record. State is derived from artifacts and git, never
+a parallel state database. An inaccessible external source is unverified, never a pass.
+
+- Framing docs — docs/prd.md, docs/stories.md, docs/reviews/stories.md, docs/architecture.md, docs/foundation.md, docs/deployment.md, docs/design-system.md, docs/design/: committed on the default branch at the end of their phase. (docs/reviews/stories.md reviews the breakdown, not a story: it is a framing doc, unlike docs/reviews/<id>.md which travels with its branch.)
+- Story docs — docs/research/<id>.md, docs/designs/<id>/ (brief.md, design.md, mockup.html), docs/plans/<id>.md, docs/reviews/<id>.md: committed on feature/<id>. docs/verif/<id>.md stays in the worktree, gitignored, and docs/verif/ holds only those records (one <id>.md per story or chore); throwaway proof — screenshots, command output — goes to .ztp/evidence/<id>/, gitignored too. The implementer's single story commit brings the research, the design and the plan; /ztp-ship commits the review. Every PR carries its own research, design, plan and review.
+- Change intake — `docs/intents/` on the target branch; corrective briefs in `docs/tickets/` travel with their work branch. `docs/ops/` reports stay in the repository base after ship cleanup.
+- Document size — research ~200 lines, plan ~250, review ~150. Every downstream agent reads these files and pays for their length. Cap the prose, never the decision tables: what carries decisions stays whole.
+- Task progress — the checkboxes in docs/plans/<id>.md: the implementer ticks each task as it lands, and they travel in the story's commit. The plan file is the live progress tracker, never a commit trigger.
+- Commits — **one commit per story**, preceded on the branch by its frozen acceptance-test commit (`test(<id>): acceptance tests`), not one per plan task. A second commit only for something you would want to revert on its own (typically a migration). The branch's commits are squashed at merge, so the default branch gets one commit per story.
+- Decisions — docs/decisions/NNN-<slug>.md (MADR format, @templates/adr.md): one file per structural decision, with the considered options and why they were rejected. Immutable: a change means a new ADR superseding the old one. Framing decisions commit on the default branch; story decisions travel with feature/<id>.
+
+## Testing
+
+**Acceptance tests first.** One test per acceptance criterion, proven red on its assertion,
+reviewed per `Test validation`, then frozen: the code phase never edits a frozen test, and a
+test believed wrong stops the work. Each rule is still tested once, at the layer where it lives.
+
+**Budget: `Test budget` (25 by default), the only one: a plan cannot raise it, and a story needing more stops.** Volume
+is not a net, and a suite that takes half an hour is a suite nobody runs. **The criterion
+that replaces the count: a test that stays green when the rule it names is deleted is worse
+than no test.**
+
+**Each check runs once, and once only** — a deterministic command re-run on the same code
+returns the same answer. Focused suite per task, on that task's own files; the full suite
+once after the last task; the type check once after the last edit; the end-to-end suite and
+the production build once at ship, never inside the cycle. Stages are settings:
+`Full suite`, `E2E stage`, `E2E scope`, `E2E smoke`, `E2E targets`, `Build stage`.
+
+Where the tests go, the four cuts, the six shapes of a test that names an invariant without
+exercising it, the red run, the freeze and the review's neutralization spot check: the
+`testing-doctrine` skill, preloaded in
+the `implementer` and the `reviewer`.
+
+## Technical conventions
+In `AGENTS.local.md`, under "Project conventions" — filled by `/ztp-architect` from the codebase,
+existing or just built. What one zone of the code needs lives in `.claude/rules/<zone>.md`,
+indexed under "Zone rules": read a zone's rule before editing a file under its paths. These are
+project files — `install.sh` never replaces them.
+
+## Never edit an installed file
+A command, an agent or a skill under `.claude/` or `.codex/` is **replaced without warning** on
+the next `install.sh`. Anything edited there is lost, silently. What is specific to this project
+becomes a setting read from `AGENTS.local.md`; what is a genuine improvement goes upstream into
+the method's `src/`. Run `install.sh --check` to list what has drifted before updating.
+
+## Definition of Done (per feature)
+- Single PR, structured description, readable diff
+- Passing tests on business logic
+- No regression on existing code
+- Review passed (no open critical issue)
+- Deployed to production, smoke test green
+
+---
+
+# Warcraftlog 2 — settings and conventions
+
+**This file is yours. `install.sh` never overwrites it, and `/ztp-setup` is its only creator.**
+`AGENTS.md` belongs to the method and is rebuilt on every update — write nothing there.
+
+Every value below is read by the pipeline commands. One setting per line, `Name: value`, nothing
+else on the line: a command reads the value as everything after the colon, trimmed. Change any of
+them at any time.
+
+**After changing anything here, rerun `install.sh`** — it reassembles `AGENTS.md` from the method's
+rules plus this file, and `AGENTS.md` is what an agent loads automatically. Settings are also read
+straight from here, so those take effect immediately; the conventions at the bottom only reach an
+agent through `AGENTS.md`, and stay stale until you reinstall.
+
+## Pipeline settings
+
+```
+Merge mode:        pr
+Target branch:     dev
+Plan validation:   human
+Ship confirmation: human
+Story track:       auto
+Flow threshold:    2
+Design source:     —
+Design skill:      —
+Design tool:       —
+Design validation: human
+Test budget:       25
+Test validation:   agent
+Fix level:         critical
+Critical fix loops: 2
+Major fix loops:   1
+Verification mode: record
+Full suite:        execute-end
+E2E stage:         ship
+E2E scope:         story
+E2E smoke:         —
+E2E targets:       —
+Build stage:       ship-if-route
+Issue tracker:     github
+Worktree root:     .worktrees/
+Sandbox port base: 3000
+Sandbox vars:      —
+Sandbox schema:    —
+Sandbox reset:     —
+Intent source:     repo
+Intent read:       —
+Intent write:      —
+Ops days:          7
+Ops window:        —
+Ops rollback threshold: —
+Protected paths:   []
+Production commands: []
+Merge commands:    []
+Merge resolve:     —
+Eval model:        —
+Eval config paths: []
+Eval timeout:      600
+CI review:         no
+CI evals:          no
+```
+
+| Setting | Accepted values |
+| --- | --- |
+| Merge mode | `local` (squash-merged locally, no review platform) · `pr` (a pull request against the target branch) |
+| Plan validation | `human` (a checkpoint blocks until you validate) · `autonomous` (the agent validates its own plan) |
+| Ship confirmation | `human` (asked before any merge) · `automatic` |
+| Design source | `internal` (the agent draws, using `Design skill`) · `external` (a brief goes to `Design tool`). Still `—` on a product with a user interface → `/ztp-design-system` sets it from the tool chosen there |
+| Design validation | who approves a story's design before it is planned: `human` (a checkpoint blocks until you validate) · `agent` (the agent checks it against the story's criteria and the design system, and validates it itself) |
+| Story track | `auto` (the story's complexity picks the lane) · `full` (always the six-phase pipeline) · `flow` (always `/ztp-flow`) |
+| Flow threshold | complexity at or below which `auto` picks `/ztp-flow` |
+| Test budget | tests per story, the only budget — a plan cannot raise it; a story that needs more stops |
+| Test validation | who reviews the acceptance tests before any code: `agent` (the reviewer, fresh context) · `human` (a checkpoint blocks) |
+| Fix level | `critical` (only blocking reviews trigger correction) · `major` (also correct majors); absent → `critical` |
+| Critical fix loops | non-negative integer, maximum correction/review attempts triggered by a critical or blocked review per story; absent → `2`. `0` stops at the first blocking review |
+| Major fix loops | non-negative integer, maximum correction/review attempts triggered by majors per story with `Fix level: major`; absent → `1`. `0` leaves majors in the report and proceeds to Ship |
+| Verification mode | `record` (the implementer records what it ran; the reviewer checks the record instead of re-running) · `rerun` (the reviewer runs everything itself) |
+| Full suite | when the whole unit suite runs: `execute-end` · `ship` · `both` |
+| E2E stage | when the end-to-end suite runs: `execute-end` · `ship` · `ci` · `—` |
+| E2E scope | what the ship's single run covers: `story` (the spec files the story's diff adds or changes, plus `E2E smoke`; an older `nominal` reads as `story`) · `full` (the whole suite — normally CI's job) |
+| E2E smoke | the few spec files every ship also runs, comma-separated — sign-in and the core loop, nothing more. `—` means none |
+| E2E targets | where the end-to-end suite runs during the story cycle — browsers (e.g. `chromium`), devices or simulators, platforms; `—` means the project's own default. Ship always runs them all |
+| Sandbox port base | a story's port or instance number is this plus its story number (`s04` → 3004) — see the `story-sandbox` skill. `—` when the product listens on nothing |
+| Sandbox vars | the configuration values that must point at the story's own resources (a web app's own URLs, a mobile app's API base URL…), comma-separated |
+| Sandbox schema | paths whose change means a schema or storage-format change, so the story gets its own data, comma-separated |
+| Sandbox reset | the command that resets and seeds the local data |
+| Build stage | when the release build runs: `ship-if-route` (only when a route, a manifest or the packaging configuration moved) · `ship` · `review` · `ci` · `—`. In a compiled language the test command already compiles; this setting governs the release build (optimized binary, package, bundle) |
+| Intent source | `repo` (`docs/intents/`) or `tracker` (canonical external record, local pointer); applies only to new changes on an existing product |
+| Intent read / Intent write | exact commands for the chosen tracker; environment: `ZTP_INTENT_REF`, `ZTP_INTENT_FILE`. `—` disables that access |
+| Ops days | positive number of days for a periodic report; a caller may supply N explicitly |
+| Ops window | positive number of minutes after deployment to observe; `—` means undecided |
+| Ops rollback threshold | explicit metric, comparator, value, unit and window; `—` means the rollback assessment is unavailable |
+| Protected paths | JSON array of repo-relative glob patterns; a trailing `/` protects its subtree. `[]` explicitly protects none |
+| Production commands | JSON array of regular expressions for commands that must be blocked under Claude Code; `[]` declares none |
+| Merge commands | JSON array of regular expressions for merge commands. Capture the target as `(?P<branch>...)` or declare `Merge resolve`; an unresolved target blocks |
+| Merge resolve | exact read-only command returning the target `feature/<id>` or `chore/<id>`; receives `ZTP_GUARD_COMMAND`. `—` requires a branch capture |
+| Eval model | exact model chosen by the declared headless runner; `—` disables evals |
+| Eval config paths | JSON array of existing repo-relative current rules/skills/hooks to overlay on each pinned task base; must be nonempty to run |
+| Eval timeout | positive maximum seconds for each headless/check command |
+| CI review / CI evals | `yes` or `no`; optional jobs disabled by default |
+
+## Project profile
+
+Settled once by `/ztp-architect`, read by every agent. What is written here is never asked
+again, and a tool it does not name is never proposed — no browser test on a product that has
+no browser.
+
+```
+Product type:       —
+Target environment: —
+UI check:           —
+E2E tool:           —
+```
+
+| Setting | What it says |
+| --- | --- |
+| Product type | from the PRD: `web app` · `mobile app` · `desktop app` · `api` · `cli` · `library` · `internal tool` · `system` · … |
+| Target environment | where the product runs and is checked: `browser` · `ios simulator` · `android emulator` · `desktop` · `terminal` · `server` · `device` · … |
+| UI check | how a screen is opened and looked at, e.g. `browser via <tool>`, `ios simulator + screenshot`. `—`: the product has no user interface — no screen is opened, no mockup is drawn |
+| E2E tool | the end-to-end tool the `E2E` command runs, e.g. `playwright`, `detox`, `maestro`, `ctest`, `pytest`. `—`: none |
+
+## Project commands
+
+```
+Package manager:   —
+Test:              —
+Test focused:      —
+Typecheck:         —
+E2E:               —
+Build:             —
+Deploy:            —
+Smoke test:        —
+Rollback:          —
+Deployment logs:   —
+Error tracking:    —
+Performance signals: —
+Usage signals:     —
+Secret scan:       —
+Review history:    —
+Eval runner:       —
+Eval check:        —
+CI review runner:  —
+```
+
+A command left at `—` is one the agents cannot run: they say so rather than guess one.
+`Test focused` runs only the given test files: `{files}` is replaced by their paths
+(e.g. `pnpm vitest run {files}`). Left at `—`, the agents run `Test` followed by the paths.
+`Deploy`, `Smoke test` and `Rollback` are filled by `/ztp-architect` when they are commands; a
+manual step stays `—` here and is described in `docs/deployment.md`.
+
+Observability is optional: `/ztp-setup` offers deployment logs and error tracking without
+requiring them. `/ztp-ops` supplies its UTC windows/release as `ZTP_OPS_*` environment values
+(see the command); the declared wrappers must support them or return filterable evidence.
+With `--hooks`, `Secret scan` is required to commit: it must scan the exported staged blobs
+at `ZTP_SCAN_DIR` and exit nonzero on a secret or an error. The hook runs it from the repo
+root and never prints scanner output. `—` blocks commits rather than skipping the scan.
+Guard arrays are declarations, not guessed defaults; review them before enabling hooks.
+
+Headless contracts and CI activation are documented in DOC.md. `Eval runner` receives
+`ZTP_EVAL_TASK`, `ZTP_EVAL_RESULT`, `ZTP_EVAL_MODEL`; `Eval check` also receives
+`ZTP_EVAL_WORKTREE` and `ZTP_EVAL_ACCEPTED`. Both run with the replay as cwd. The checker
+command/script must be trusted and outside the replay; use `ZTP_EVAL_SOURCE` to locate it.
+
+## Project conventions
+
+<< structure, stack, patterns, naming, commit rules — filled by /ztp-architect, as rules an agent can apply >>
+
+### Zone rules
+
+<< written by /ztp-architect, Step 6 — the detail lives only in the rule file; this table points to it, with the same `paths` >>
+
+| Zone | Paths | Rule | Summary |
+|---|---|---|---|
+| << zone >> | `<< **/src/… /** >>` | .claude/rules/<< zone >>.md | << one line >> |

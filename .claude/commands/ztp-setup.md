@@ -1,0 +1,95 @@
+---
+description: Create the project's AGENTS.local.md — the settings and commands the pipeline reads. Runs once, before /ztp-prd.
+argument-hint: <optional --observability to configure an existing project>
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - Bash
+  - AskUserQuestion
+---
+# ztp-setup — The project's settings, once
+
+This command writes `AGENTS.local.md`: the file that belongs to the project and that
+`install.sh` never overwrites. Every pipeline command reads its settings there.
+
+## Execution contract (non-negotiable)
+You are FORBIDDEN from:
+- Writing anything into `AGENTS.md`. It belongs to the method and is rebuilt on every install.
+- Asking more than the four questions below. Everything else has a default the user can change later.
+- Inventing a project command you have not seen in the repository.
+
+This command is the **only** creator of `AGENTS.local.md` — `install.sh` never writes it, so
+finding it absent is the normal case, not an error.
+
+If `AGENTS.local.md` already exists → do NOT overwrite it. Show its current settings and stop:
+"Settings already in AGENTS.local.md. Edit it directly, or use /ztp-setup --observability to declare optional production signals."
+
+**Exception: `$ARGUMENTS` is `--observability`.** Read the existing file, show any declared
+deployment-log and error-tracking commands, and offer to configure those two optional
+sources, the observation window and rollback threshold. Accept commands only from the
+repository or the user's explicit answer; never infer a CLI from a hosting hostname. A
+decline changes nothing. On acceptance, edit only `Deployment logs`, `Error tracking`,
+`Performance signals`, `Usage signals`, `Ops days`, `Ops window` and `Ops rollback threshold`
+that the user confirmed (add absent keys), preserving every other setting. Then use Steps
+3–4's commit/reassembly discipline. Missing file → run normal setup first.
+
+## Workflow
+
+### Step 1 — Read what the repository already answers
+Never ask what the code states. Look for the package manager or build system (lockfile,
+`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `CMakeLists.txt`, Gradle or Maven
+files, an Xcode project, a `Makefile`…) and the commands the project actually declares (its
+manifest scripts, task runner, build targets).
+Note the default branch (`git symbolic-ref refs/remotes/origin/HEAD`, else the current branch).
+For the `Sandbox` settings: the configuration values that hold the product's own address (a web
+app's URLs and trusted origins, a mobile app's API base URL), the schema and migration
+directories, and a declared reset-and-seed script. Not found → `—`.
+Anything you find becomes the pre-filled answer, not a question.
+Also look for declared read-only deployment logs, error tracking, performance/usage queries
+and a staged-secret scanner. A provider name, an installed CLI or an environment variable
+does not prove a usable command; absent declarations remain `—`.
+
+### Step 2 — Ask the four questions (AskUserQuestion)
+Only these four. Each one changes what the pipeline does; the rest is pre-filled.
+
+1. **Where a story lands** — `Merge mode`: `pr` (a pull request against the target branch) or
+   `local` (squash-merged locally, no review platform). Confirm `Target branch` with it.
+2. **Who validates a plan** — `Plan validation`: `human` (a checkpoint blocks until the user
+   validates) or `autonomous` (the agent validates its own plan and executes).
+3. **Who draws the screens** — `Design source`: `internal` (the agent produces the mockup, with
+   the skill named in `Design skill`) or `external` (the agent writes a brief and an external
+   tool named in `Design tool` produces it). A product without a user interface answers `—`:
+   no story will run `/ztp-design`. Not decided yet → `—` too: `/ztp-design-system` sets it
+   from the tool chosen there.
+4. **The project's commands** — test, typecheck, e2e, build, pre-filled from Step 1. A command
+   the project does not have stays `—`; never invent one. On a new project they are all `—`
+   for now: `/ztp-architect` fills them once the foundation exists, with `Deploy`,
+   `Smoke test` and `Rollback`.
+
+   In this same commands question, **offer, without requiring**, at least `Deployment logs`
+   and `Error tracking`, so `/ztp-ops` can be used from the start. Show only actual commands
+   found or supplied by the user. Offer the observation window and threshold when known.
+   Skipping leaves them `—` and does not block setup. `Secret scan` is prefilled only when
+   its staged-snapshot contract is confirmed; explain that opt-in `--hooks` needs it.
+
+`Ship confirmation` follows `Plan validation` unless the user says otherwise: a project that
+validates plans by hand confirms its ships by hand.
+
+### Step 3 — Write it
+Write `AGENTS.local.md` from @templates/agents-local.md, filled with the answers and the
+defaults. A setting whose accepted values do not include `—` never gets one: nobody asked
+about it → it keeps the template's default. Keep its shape exactly: one setting per line, `Name: value`, **no trailing comment** —
+the commands read the value as everything after the colon, so a comment on the line becomes part
+of the value. The accepted values stay in the table below the block. Leave "Project profile" and "Project conventions"
+as their placeholders — `/ztp-architect` fills them from the codebase, existing or just built.
+
+Commit it on the default branch (`chore: project settings`). It is a project file, not a story file.
+
+### Step 4 — Rebuild AGENTS.md
+Run `./install.sh --target <the targets this project uses>` so the rules and the settings are
+assembled into `AGENTS.md`. If `install.sh` is not in the project, say so: the settings are
+written, the assembled file is one install away.
+
+End with: "Settings written to AGENTS.local.md. Next step: /ztp-prd <idea>"
