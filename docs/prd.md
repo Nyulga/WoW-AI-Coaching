@@ -40,7 +40,7 @@ Non vérifiée avant de construire.
 | Vue détaillée d'un combat : dégâts, soins, buffs/debuffs, graphiques | 4 | Nombreux types d'événements, rattachement des familiers à leur joueur, absorptions et surplus de soin, graphiques dans le temps |
 | Historique de mes logs et progression sur un même boss | 2 | Liste et comparaison simples ; nécessaire pour mesurer l'hypothèse |
 | Accès MCP pour l'assistant IA du joueur : il lit le résumé de ses combats, renvoie des conseils concrets, que le site affiche et garde dans l'historique | 4 | Intégration externe (serveur MCP) avec connexion par compte ; c'est le cœur de la valeur |
-| Comparaison avec d'autres utilisateurs du site sur le même boss | 3 | Logique de comparaison entre joueurs |
+| Comparaison avec d'autres utilisateurs du site sur le même boss, uniquement entre joueurs qui ont donné leur accord (opt-in) | 3 | Logique de comparaison entre joueurs et réglage d'accord par joueur |
 
 Scale: 1 trivial CRUD · 2 form + persistence + list · 3 business logic / several states · 4 integrations, payments, roles · 5 real-time, migrations, external systems. A 5 is an out-of-scope candidate — keep it only if it IS the core value.
 
@@ -65,7 +65,8 @@ et l'historique montre si ça a marché.
 - Construit seul, par un non-développeur avec un agent (formation Ultra) : la technique doit rester
   simple à maintenir.
 - RGPD : comptes avec e-mail d'utilisateurs européens — données personnelles protégées, droit de
-  suppression du compte.
+  suppression du compte. Les combats d'un joueur ne sont visibles par d'autres utilisateurs qu'avec
+  son accord explicite (opt-in), qu'il peut retirer à tout moment.
 
 ## Success criteria
 - Tout le périmètre « In scope » est livré et fonctionne en production.
