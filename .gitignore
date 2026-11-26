@@ -1,3 +1,4 @@
 /docs/verif/
 /.ztp/evidence/
 .env*.local
+/docs/chiffrage.md
