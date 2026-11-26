@@ -3,8 +3,8 @@
 > One story = one shippable slice, written to be executed by an agent.
 > Id format: `s<number>-<short-slug>` — reused in every pipeline file and in the branch name.
 
-**Lot initial livrable seul** (première boucle de valeur, jusqu'au coaching) : s01 à s11, plus s17
-(placée juste après s04, pour qu'aucun chiffre ne soit affiché sans contrôle de version).
+**Lots** : voir `docs/lots.md` (lot initial et lots suivants). s17 est placée juste après s04 :
+entre ces deux mises en production, des chiffres s'affichent sans contrôle de version.
 
 La mesure du signal de l'hypothèse (10 joueurs, 70 %, 30 jours) se fait hors produit, par une
 requête directe sur les données : aucune story ne l'affiche.
