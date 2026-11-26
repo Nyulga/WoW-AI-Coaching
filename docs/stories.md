@@ -312,7 +312,7 @@ Source: docs/prd.md
 **As a** administrateur **I want** voir les utilisateurs et désactiver un compte **so that** je protège le site.
 
 ### Complexity
-4
+3
 
 ### Acceptance criteria
 - [ ] AC1 — Un utilisateur qui n'est pas admin ne peut pas accéder à l'espace admin.
@@ -325,7 +325,7 @@ Source: docs/prd.md
 s01-sign-up-sign-in, s02-upload-log-list-fights, s10-connect-ai-assistant.
 
 ### Agentic notes
-- **Risque (4)** : droits. Chaque action admin est vérifiée côté serveur, pas seulement masquée à l'écran.
+- **Risque** : droits. Chaque action admin est vérifiée côté serveur, pas seulement masquée à l'écran.
 - Le premier admin est désigné hors de l'interface (configuration ou commande).
 
 ## Story s14-admin-delete-log — Supprimer un log (admin)
