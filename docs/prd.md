@@ -48,6 +48,7 @@ Non vérifiée avant de construire.
 | Suppression de mon compte et de toutes mes données | 2 | Confirmation et suppression simples ; obligatoire (RGPD) |
 | Comptes administrateurs : gérer les utilisateurs et les logs | 4 | Rôles et droits distincts ; gardé pour protéger un site public |
 | Envoi et lecture du fichier combat log officiel de WoW Retail | 5 | Format externe, fichiers très volumineux ; gardé car c'est la base de toute la valeur |
+| Compatibilité avec le patch : le site affiche le patch du jeu avec lequel ses chiffres sont compatibles, et refuse clairement un log dont le format n'est pas pris en charge plutôt que d'afficher des chiffres faux | 2 | Lecture de la version du log et message clair ; protège la confiance dans les chiffres |
 | Vue détaillée d'un combat : dégâts, soins, buffs/debuffs, graphiques | 4 | Nombreux types d'événements, rattachement des familiers à leur joueur, absorptions et surplus de soin, graphiques dans le temps |
 | Historique de mes logs et progression sur un même boss | 2 | Liste et comparaison simples ; nécessaire pour mesurer l'hypothèse |
 | Accès MCP pour l'assistant IA du joueur : il lit le résumé de ses combats, renvoie des conseils concrets, que le site affiche et garde dans l'historique | 4 | Intégration externe (serveur MCP) avec connexion par compte ; c'est le cœur de la valeur |
@@ -80,6 +81,10 @@ et l'historique montre si ça a marché.
 - RGPD : comptes avec e-mail d'utilisateurs européens — données personnelles protégées, droit de
   suppression du compte. Les combats d'un joueur ne sont visibles par d'autres utilisateurs qu'avec
   son accord explicite (opt-in), qu'il peut retirer à tout moment.
+- Justesse à chaque patch : les chiffres doivent rester justes après chaque patch du jeu (le format
+  du log et les règles de calcul peuvent changer d'une semaine à l'autre). Chaque patch demande une
+  vérification et, si besoin, une mise à jour rapide ; en attendant, un format non pris en charge
+  est refusé plutôt que mal analysé.
 - Dépendance : accès à l'API Warcraft Logs (clé d'accès, conditions d'utilisation, limites d'appels).
   Si ses conditions d'utilisation interdisent notre usage, la comparaison aux meilleurs joueurs sort
   du périmètre et une autre intégration externe est choisie.
