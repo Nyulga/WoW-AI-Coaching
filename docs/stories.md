@@ -227,7 +227,7 @@ Source: docs/prd.md
 
 ### Acceptance criteria
 - [ ] AC1 — La page « Mes logs », créée en s02, liste mes logs du plus récent au plus ancien, avec leur date et leur nombre de combats.
-- [ ] AC2 — Pour un boss et une difficulté, mes essais successifs s'affichent avec mon chiffre clé et l'écart avec l'essai précédent.
+- [ ] AC2 — Pour un boss et une difficulté, mes essais successifs s'affichent avec mon chiffre clé et l'écart en % avec l'essai précédent.
 - [ ] AC3 — Le chiffre clé est le HPS si mon personnage avait une spécialisation de soigneur sur ce combat, sinon le DPS.
 - [ ] AC4 — Seuls les essais de mon personnage (choisi en s03) apparaissent.
 
@@ -400,7 +400,7 @@ Source: docs/prd.md
 
 ### Acceptance criteria
 - [ ] AC1 — Sans abonnement, l'outil « lire le résumé d'un combat » répond normalement pour 3 combats différents dans la même semaine.
-- [ ] AC2 — Sans abonnement, la lecture d'un 4ᵉ combat différent dans la même semaine est refusée avec un message qui indique la limite atteinte, la date de remise à zéro et comment s'abonner.
+- [ ] AC2 — Sans abonnement, la lecture d'un 4ᵉ combat différent dans la même semaine est refusée avec un message qui indique la limite atteinte et la date de remise à zéro.
 - [ ] AC3 — Relire un combat déjà lu dans la même semaine ne compte pas comme un nouveau coaching.
 - [ ] AC4 — Le compteur repart à zéro chaque mercredi à 0 h, heure de Paris.
 - [ ] AC5 — L'outil « lister mes combats » n'est jamais limité.
@@ -411,6 +411,7 @@ s10-connect-ai-assistant.
 
 ### Agentic notes
 - Un coaching = l'assistant IA lit le résumé d'un combat (PRD). Le compteur se vérifie côté serveur, à chaque appel de l'outil : jamais côté assistant.
+- Seul « lire le résumé d'un combat » est décompté : « lister mes combats », « enregistrer un conseil » (s11) et « comparer aux meilleurs » (s16) ne le sont jamais. Le compteur est par compte : sans connexion, aucun outil ne répond (s10 AC2).
 - Le message de refus est lu par une IA puis montré au joueur : court, clair, sans détail technique.
 - La limite (3) et le début de semaine sont à un seul endroit, pour pouvoir les changer sans toucher la logique.
 - Les tests fixent l'heure (pas d'horloge réelle) pour vérifier la remise à zéro du mercredi.
@@ -431,6 +432,9 @@ Source: docs/prd.md
 - [ ] AC5 — Une même confirmation de Stripe reçue deux fois ne crée qu'un seul abonnement.
 - [ ] AC6 — La page de mon compte indique que je suis abonné et la date du prochain paiement.
 - [ ] AC7 — La page d'abonnement indique que l'abonnement à l'assistant IA lui-même n'est pas compris.
+- [ ] AC8 — Sans abonnement, le message de refus d'un 4ᵉ coaching dans la semaine (s18) indique comment s'abonner.
+- [ ] AC9 — Un visiteur non connecté qui clique sur « S'abonner » est d'abord envoyé vers la connexion, puis revient à l'abonnement.
+- [ ] AC10 — Un compte déjà abonné qui clique sur « S'abonner » voit qu'il est déjà abonné, et aucun nouveau paiement ne lui est proposé.
 
 ### Dependencies
 s01-sign-up-sign-in, s18-ai-coaching-weekly-limit.
@@ -440,6 +444,7 @@ s01-sign-up-sign-in, s18-ai-coaching-weekly-limit.
 - Page de paiement fournie par Stripe (aucune donnée de carte ne passe par le site ni n'y est stockée, PRD). Le produit exact de Stripe (Checkout, Billing) se fixe en recherche.
 - Développement et tests en mode test de Stripe uniquement ; les clés vont dans `.env.local`, jamais dans le dépôt ni dans les pages.
 - Ouvrir l'abonnement au public demande un statut légal réglé avant (PRD, contraintes) : ce n'est pas un critère de cette story, mais un prérequis de sa mise en production publique.
+- L'abonnement n'est pas ouvert au public tant que s20 n'est pas livrée : avant, un abonné ne pourrait ni résilier, ni arrêter les prélèvements en supprimant son compte.
 
 ## Story s20-manage-subscription — Gérer et résilier mon abonnement
 Source: docs/prd.md
@@ -475,7 +480,7 @@ Source: docs/prd.md
 
 ### Acceptance criteria
 - [ ] AC1 — Dans mes paramètres, j'enregistre l'adresse de webhook d'un salon Discord ; une adresse qui n'est pas un webhook Discord est refusée avec un message.
-- [ ] AC2 — Sur un de mes combats, « Partager sur Discord » publie dans ce salon : boss, difficulté, résultat, mon chiffre clé, l'écart avec mon essai précédent et le dernier conseil reçu.
+- [ ] AC2 — Sur un de mes combats, « Partager sur Discord » publie dans ce salon : boss, difficulté, résultat, mon chiffre clé, l'écart en % avec mon essai précédent et le dernier conseil reçu.
 - [ ] AC3 — Le message publié ne contient ni mon e-mail ni les chiffres des autres joueurs.
 - [ ] AC4 — Un conseil qui contient une mention Discord (`@everyone`, `@here`, un rôle ou un membre) est publié sans notifier personne.
 - [ ] AC5 — Si Discord ne répond pas ou refuse le message, un message clair s'affiche et le reste de la page du combat fonctionne normalement.
