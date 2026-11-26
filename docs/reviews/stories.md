@@ -2,52 +2,65 @@
 
 > Revue à contexte neuf de `docs/stories.md` par rapport à `docs/prd.md` et aux intents acceptées qui y sont liées. Chaque problème est classé critical / major / minor.
 
-Sources reviewed : `docs/prd.md` et `docs/stories.md`, lus sur le disque — branche `dev`, HEAD `7f9b2b6` selon l'appelant (le relecteur, sans shell, ne l'a pas vérifié lui-même). Aucune intent n'est liée : les 17 stories indiquent toutes `Source: docs/prd.md`, et `docs/intents/` n'existe pas. Le relecteur a lu la revue précédente (HEAD `8d031df`) une fois sa propre vérification terminée : ses 6 findings sont corrigés dans le fichier actuel.
+Sources relues : `docs/prd.md`, dont la dernière modification est le commit `9a95e5f` (abonnement et partage Discord passés « In scope »), et `docs/stories.md`, dont la dernière modification est le commit `da7bbe9` (s18 à s21, semaine qui repart le mercredi). Les deux fichiers ont été lus sur le disque. J'ai vérifié deux choses dans `.git` : `HEAD` pointe sur `refs/heads/dev`, et `dev` pointe sur `da7bbe9c4eabf2a065dfce44e94f9943d91145b7`. Selon l'état git fourni, le seul fichier non suivi est `docs/lots.md` : le disque correspond donc à `da7bbe9`. Le contenu des commits n'a pas pu être comparé, faute de shell. Aucune intent n'est liée : les 21 stories indiquent toutes `Source: docs/prd.md`, et `docs/intents/` n'existe pas. La revue couvre toute la liste, s01 à s21. Je n'ai lu la revue précédente (`docs/reviews/stories.md`) qu'après mon propre examen, pour savoir si ses findings ont été corrigés : ses 4 minors sont toujours ouverts (findings 9 à 12).
 
 ## Perimeter coverage
 | PRD feature / accepted intent outcome | Covered by | OK? |
 |---|---|---|
 | Comptes utilisateur : inscription, connexion | s01-sign-up-sign-in | ✅ |
-| Suppression de mon compte et de toutes mes données (RGPD) | s15-delete-my-account | ✅ |
-| Comptes administrateurs : gérer les utilisateurs et les logs | s13-admin-manage-users (utilisateurs), s14-admin-delete-log (logs) | ✅ |
-| Envoi et lecture du combat log officiel Retail (complexité 5 dans le PRD) | s02-upload-log-list-fights (envoi, liste des combats, refus) ; la lecture des chiffres est répartie entre s04 et s08 | ✅ (le 5 est découpé) |
-| Compatibilité avec le patch (affichage du patch, refus d'un format non pris en charge) | s17-patch-compatibility (+ s02 AC4 pour ce qui n'est pas Retail) | ✅ |
-| Vue détaillée d'un combat : dégâts, soins, buffs/debuffs, graphiques (familiers, absorptions, surplus de soin) | s04, s05, s06, s07, s08 | ✅ |
-| Historique de mes logs et progression sur un même boss | s09-boss-progress-history (+ s03 pour « mon » personnage) | ✅ |
-| Accès MCP : l'assistant lit le résumé et renvoie des conseils que le site affiche et garde dans l'historique | s10-connect-ai-assistant (connexion par compte, lecture), s11-ai-advice-on-fight (enregistrement, affichage, signalement dans la progression) | ✅ |
-| Comparaison avec d'autres utilisateurs, seulement avec leur accord (opt-in) | s12-compare-with-opt-in | ✅ |
-| Comparaison aux meilleurs joueurs de ma spé via l'API Warcraft Logs (sur le site et lisible par l'assistant) | s16-compare-with-top-players (AC1 sur le site, AC3 outil de l'assistant) | ✅ |
+| Suppression de mon compte et de toutes mes données (RGPD) | s15-delete-my-account (étendue ensuite par s16, s20 AC5, s21) | ✅ (voir findings 1 et 4) |
+| Comptes administrateurs : gérer les utilisateurs et les logs | s13-admin-manage-users, s14-admin-delete-log | ✅ |
+| Envoi et lecture du combat log Retail (5 dans le PRD) | s02 (envoi, liste, refus), puis s04 à s08 pour les chiffres | ✅ (le 5 est découpé) |
+| Compatibilité avec le patch | s17-patch-compatibility (+ s02 AC4) | ✅ |
+| Vue détaillée d'un combat : dégâts, soins, buffs/debuffs, graphiques | s04, s05, s06, s07, s08 | ✅ |
+| Historique de mes logs et progression sur un même boss | s09 (+ s03) | ✅ |
+| Accès MCP : lecture du résumé, conseils affichés et gardés | s10, s11 | ✅ |
+| Comparaison avec d'autres utilisateurs (opt-in) | s12 | ✅ |
+| Comparaison aux meilleurs de ma spé via l'API Warcraft Logs | s16 | ✅ |
+| Abonnement à 5 €/mois pour un coaching illimité ; 3 coachings/semaine sans abonnement ; lister ses combats reste gratuit et illimité ; l'abonnement à l'assistant IA n'est pas compris ; résiliation et paiement refusé | s18 (limite de 3, AC5 : la liste reste libre), s19 (abonnement, AC2 : illimité, AC7 : assistant non compris), s20 (résiliation, renouvellement, paiement refusé) | ✅ |
+| Partage sur Discord : chiffre clé, progression et dernier conseil dans un salon choisi, sans bot, message clair si Discord ne répond pas | s21-share-fight-discord | ✅ |
 
-- [x] Every feature of the PRD "In scope (core loop)" table is delivered by at least one story
-- [x] Every linked intent is accepted and its outcome covered; canonical tracker sources verified : sans objet, aucune intent n'est liée
+- [x] Chaque fonction du tableau « In scope (core loop) » du PRD est livrée par au moins une story.
+- [x] Chaque intent liée est acceptée et son résultat couvert : sans objet, aucune intent n'est liée.
 
 ## Scope
-- [x] Any change to a PRD exclusion has an explicit approved intent decision : aucune exclusion du PRD n'est modifiée
-- [x] No story goes beyond the perimeter. Points vérifiés :
-  - Pas de replay, pas d'envoi en direct, pas de version Classic (refusée en s02 AC4), pas de paiement, pas d'IA payée ou hébergée par le site (note de s10), pas d'application mobile, pas de bot Discord, pas de gestion de guilde.
-  - s16 : on compare des valeurs aux 10 meilleurs, sans percentiles ; les autres usages de l'API sont exclus dans ses notes.
-  - s01 exclut explicitement Battle.net/Google et la réinitialisation du mot de passe.
-  - s03 (choisir son personnage) n'a pas de ligne dans le PRD, mais elle est nécessaire pour « mes » combats, l'historique et les comparaisons : pas une sortie du périmètre.
+- [x] Aucune exclusion du PRD n'est modifiée sans décision d'intent : l'abonnement et Discord sont entrés dans le périmètre par le PRD lui-même (`9a95e5f`), pas en levant une exclusion.
+- [x] Aucune story ne sort du périmètre, avec deux réserves mineures (findings 6 et 7). Points vérifiés :
+  - **Discord** : s21 passe par un webhook (une adresse fournie par Discord qui permet de publier dans un salon). Il n'y a ni bot ni liaison de compte Discord, ce que sa note rappelle. Pas d'autre plateforme.
+  - **Abonnement** : un seul niveau, pas de paiement à l'unité. Le site ne stocke aucune donnée de carte (note de s19). s20 exclut le remboursement, le changement de prix et les niveaux multiples.
+  - **Coaching** : aucune IA payée par le site.
+  - Le « mercredi à 0 h, heure de Paris » (s18 AC4) précise la « semaine » du PRD : ce n'est pas un ajout de périmètre.
 
 ## Story quality
-- [x] Each story is an end-to-end shippable slice, not a technical layer : chaque story livre un écran ou un outil MCP utilisable.
-- [x] Every acceptance criterion can become a test : oui, avec trois imprécisions mineures sur la valeur attendue (findings 2 à 4)
-- [x] Agentic notes present and useful (files, constraints, traps) : présentes partout et utiles
-- [x] Complexity scored; no unsplit 5; every 4 states its risk : aucun 5 ; les six stories notées 4 (s02, s04, s05, s10, s13, s16) indiquent toutes leur risque.
+- [x] Chaque story est une tranche livrable de bout en bout, pas une couche technique. Réserve sur s18 et s19 livrées seules : findings 1 et 2.
+- [x] Chaque critère d'acceptation peut devenir un test. Il reste des valeurs attendues imprécises : findings 3, 8, 10 et 11.
+- [x] Les notes pour l'agent sont présentes et utiles. Il manque une note sur la suppression des données dans s18 et s19 (finding 4).
+- [x] Complexité notée, aucun 5 laissé entier, chaque 4 indique son risque. Les 4 sont s02, s04, s05, s10, s16, s19 et s20 ; chacun a une ligne « Risque (4) ». s13 est passée à 3 et garde sa note de risque.
 
 ## The list as a whole
-- [x] Dependency order executable: no cycle, no forward reference. Ordre vérifié : s01, s02, s03, s04, s17, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16. Chaque dépendance arrive avant la story qui en a besoin. Une réserve mineure sur le lot initial : finding 1.
-- [x] Ids well-formed (`s<number>-<slug>`), unique and stable : s01 à s17, tous uniques ; s17 garde son id malgré sa place dans la liste, ce qui est voulu.
-- [x] No overlap or duplication between stories. Frontières écrites : s02 AC4 / s17 AC3 ; s02 AC1 / s09 AC1 ; s02 AC6, s10 AC5 et s16 AC3 cloisonnent des surfaces différentes ; s10 AC7 et s13 AC5 n'ont pas le même déclencheur.
+- [x] Ordre des dépendances exécutable, sans cycle ni référence en avant. L'ordre vérifié est : s01, s02, s03, s04, s17, s05, s06, s07, s08, s09, s10, s11, s12, s13, s14, s15, s16, s18, s19, s20, s21. Chaque dépendance déclarée arrive avant la story qui en a besoin. Exception : une référence en avant dans un critère de s18 (finding 2).
+- [x] Ids bien formés (`s<number>-<slug>`), uniques et stables : s01 à s21, sans doublon.
+- [x] Pas de chevauchement entre stories. Les frontières sont nettes :
+  - s18 décompte la limite, s19 la lève, s20 gère la suite de l'abonnement.
+  - s21 réutilise la progression de s09 et le conseil de s11 sans les refaire.
+  - s20 AC5 étend s15 sans la dupliquer.
 
 ## Findings
-1. **minor — s17-patch-compatibility / en-tête du lot initial.** L'en-tête dit que s17 est « placée juste après s04, pour qu'aucun chiffre ne soit affiché sans contrôle de version ». Pourtant s04 (dégâts et DPS) est livrée en production avant s17 : pendant une story, le site affiche des chiffres pour n'importe quelle version Retail, alors que le PRD dit qu'« un format non pris en charge est refusé plutôt que mal analysé ». Corrections possibles : s17 passe avant s04 (son AC1 porterait alors sur la page du log, créée en s02, puis sur la page du combat), ou l'en-tête reconnaît cette fenêtre.
-2. **minor — s09-boss-progress-history (AC2).** « L'écart avec l'essai précédent » n'a pas d'unité (valeur absolue ou %). L'hypothèse du PRD se mesure en % (+5 %).
-3. **minor — s12-compare-with-opt-in (AC3).** Pour un joueur ayant plusieurs combats sur le même boss, la même difficulté et la même spé, l'AC ne dit pas quel chiffre est retenu (meilleur, dernier, moyenne) ni s'il apparaît une ou plusieurs fois : la valeur attendue du test n'est pas fixée.
-4. **minor — « difficulté » en Mythique+ (s02 AC1, s09 AC2, s12 AC3, s16 AC1).** En M+, tous les boss ont la même difficulté « Mythique+ » quel que soit le niveau de clé, alors qu'un +10 et un +15 ne sont pas comparables. Il faut dire, dans une note ou un AC, si le niveau de clé fait partie de la « difficulté » pour les essais, la progression et les comparaisons — ou le noter explicitement comme à trancher en recherche.
+1. **major — s19-subscribe / s20-manage-subscription.** s19 met en production un prélèvement mensuel, alors que la résiliation (s20 AC1-AC2) et l'arrêt des prélèvements à la suppression du compte (s20 AC5) n'arrivent qu'avec s20. Entre les deux mises en production, un abonné ne peut pas arrêter de payer. S'il supprime son compte (s15 déjà en production), les prélèvements continuent alors que son compte n'existe plus. Le PRD promet pourtant « Suppression de mon compte et de toutes mes données ». Corrections possibles : déplacer s20 AC5 dans s19 (avec au moins une résiliation) ; ou écrire noir sur blanc que l'abonnement n'est pas ouvert au public avant que s20 soit livrée, comme la note de s19 le fait déjà pour le statut légal.
+2. **major — s18-ai-coaching-weekly-limit (AC2).** Le message de refus doit dire « comment s'abonner ». Or l'abonnement n'existe qu'avec s19, placée après s18 et qui dépend de s18 : c'est une référence en avant. Faire dépendre s18 de s19 créerait un cycle. Livrée seule, s18 limite aussi le coaching sans aucun moyen de lever la limite. Correction : retirer « comment s'abonner » de s18 AC2 et l'ajouter au message de refus dans s19. Ou bien indiquer que s18 et s19 passent en production ensemble.
+3. **minor — s18 (AC1, AC5, AC6).** Seul l'outil « lire le résumé d'un combat » est décompté. Les critères ne disent pas si l'outil « comparer aux meilleurs » (s16), qui renvoie aussi des chiffres sur un combat, compte comme un coaching ou contourne la limite. Rien n'est dit non plus de « enregistrer un conseil » (s11). Et AC6 ne dit pas ce que la page affiche pour un abonné (par exemple « illimité »), ni s19.
+4. **minor — s18 et s19 (notes).** Contrairement à s16 et s21, aucune note ne prévoit d'effacer avec le compte (s15) les données qu'elles créent : le compteur et la liste des combats lus pour s18, la référence client et abonnement Stripe pour s19. La note de s15 ne vise que les stories déjà livrées au moment de son exécution, donc pas celles-ci.
+5. **minor — s19 (AC1).** Rien ne dit ce qui se passe si un compte déjà abonné relance « S'abonner » (deux abonnements payés ?). AC5 ne couvre que la même confirmation Stripe reçue deux fois.
+6. **minor — s19 (AC1) / exclusion « autres moyens de paiement que la carte ».** Aucun critère ni note n'impose que la page de paiement de Stripe ne propose que la carte. Or elle peut afficher d'autres moyens selon la configuration du compte Stripe. Un test ou une note suffit à fermer ce risque de sortie du périmètre.
+7. **minor — s20 (AC1).** « Voir mes factures » ne figure pas dans le PRD. L'ajout est léger (souvent fourni par le portail Stripe) et sans doute utile légalement, mais c'est au porteur de le confirmer.
+8. **minor — s21 (AC2).** Les cas limites ne sont pas fixés : un combat sans conseil, un premier essai sans essai précédent. L'unité de « l'écart avec mon essai précédent » n'est pas donnée non plus (même imprécision que le finding 10).
+9. **minor — s17 / en-tête du lot initial** (finding 1 de la revue précédente, non corrigé). s04 est livrée avant s17. Pendant une story, des chiffres sont donc affichés sans contrôle de version, alors que l'en-tête dit le contraire.
+10. **minor — s09 (AC2)** (finding 2 précédent, non corrigé). L'écart avec l'essai précédent n'a pas d'unité (valeur ou %), alors que l'hypothèse du PRD se mesure en % (+5 %).
+11. **minor — s12 (AC3)** (finding 3 précédent, non corrigé). Quand un joueur a plusieurs combats comparables, on ne sait pas quel chiffre est retenu (meilleur, dernier ou moyenne).
+12. **minor — « difficulté » en Mythique+ (s02, s09, s12, s16, et maintenant s21)** (finding 4 précédent, non corrigé). Rien ne dit si le niveau de clé fait partie de la difficulté.
 
 ## Verdict
-Aucun critical ni major. Toutes les fonctions « In scope » du PRD sont couvertes et rien ne sort du périmètre. Il n'y a ni cycle ni référence en avant, aucun 5 n'est resté non découpé, et tous les 4 indiquent leur risque. Les 6 findings de la revue précédente sont corrigés. Il reste 4 minors, corrigeables dans `docs/stories.md` avant `/ztp-architect`, mais non bloquants.
+Toutes les fonctions « In scope » du PRD au commit `9a95e5f` sont couvertes, abonnement et partage Discord compris, et rien ne reprend une exclusion. Il n'y a ni cycle ni 5 laissé entier, et chaque 4 indique son risque. Deux majors portent sur l'ordre de mise en production de l'abonnement (findings 1 et 2) : ils se corrigent dans `docs/stories.md` avant d'ouvrir l'abonnement au public, et le mieux est de le faire avant `/ztp-architect`. Il reste 10 minors, dont les 4 de la revue précédente toujours ouverts.
 
-Max severity: minor
+Max severity: major
 Stories ready: yes
