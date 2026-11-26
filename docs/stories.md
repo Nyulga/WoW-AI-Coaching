@@ -363,3 +363,25 @@ s09-boss-progress-history, s10-connect-ai-assistant.
 - **Critère d'arrêt de la recherche** : si les conditions d'utilisation de l'API Warcraft Logs interdisent cet usage, la story s'arrête ; elle sort du périmètre et une autre intégration externe est choisie (PRD, contraintes).
 - Brique « intégration externe » exigée par la formation.
 - Hors périmètre : tout autre usage de l'API (import de rapports, classements).
+
+## Story s17-patch-compatibility — Savoir avec quel patch les chiffres sont justes
+Source: docs/prd.md
+
+**As a** joueur **I want** savoir avec quel patch du jeu les chiffres du site sont compatibles, et qu'un log non pris en charge soit refusé **so that** je puisse faire confiance aux chiffres affichés.
+
+### Complexity
+2
+
+### Acceptance criteria
+- [ ] AC1 — Chaque page de combat affiche le patch du jeu avec lequel les chiffres du site sont compatibles.
+- [ ] AC2 — Chaque log enregistré garde la version du jeu détectée dans le fichier, affichée sur sa page.
+- [ ] AC3 — Un log Retail dont la version n'est pas prise en charge est refusé avec un message qui indique la version détectée et la version prise en charge, et rien n'est enregistré.
+
+### Dependencies
+s04-fight-damage-by-player.
+
+### Agentic notes
+- Version lue dans la première ligne du log : `COMBAT_LOG_VERSION`, `BUILD_VERSION` (et `PROJECT_ID`, déjà utilisé par s02 AC4 pour refuser les versions autres que Retail). Ce que « pris en charge » couvre exactement (version de format, plage de builds) se fixe en recherche.
+- Frontière avec s02 : s02 refuse ce qui n'est pas Retail ; s17 refuse une version Retail non prise en charge.
+- La version prise en charge doit pouvoir changer vite à chaque patch (contrainte « Justesse à chaque patch » du PRD) : la garder à un seul endroit, séparée de la logique de lecture.
+- La vérification à chaque patch (log récent, totaux comparés à Warcraft Logs) est un travail de maintenance (`/ztp-chore`), pas un critère de cette story.
