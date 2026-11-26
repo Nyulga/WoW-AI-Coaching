@@ -3,9 +3,10 @@
 > One story = one shippable slice, written to be executed by an agent.
 > Id format: `s<number>-<short-slug>` — reused in every pipeline file and in the branch name.
 
-**Lot initial livrable seul** (première boucle de valeur, jusqu'au coaching) : s01, s02, s03, s04,
-s05, s10, s11. s10 dépend aussi de s06, s07, s08 : soit ces stories rejoignent le lot, soit le
-résumé lu par l'assistant se limite d'abord aux dégâts et soins — à trancher en revue des stories.
+**Lot initial livrable seul** (première boucle de valeur, jusqu'au coaching) : s01 à s11.
+
+La mesure du signal de l'hypothèse (10 joueurs, 70 %, 30 jours) se fait hors produit, par une
+requête directe sur les données : aucune story ne l'affiche.
 
 Pièges communs à toutes les stories qui lisent un log :
 - **Dépôt GitHub public** : un vrai combat log contient les noms de vrais personnages. Ne jamais
@@ -55,7 +56,7 @@ Source: docs/prd.md
 - [ ] AC4 — Un combat log d'une autre version du jeu que Retail est refusé avec un message clair, et rien n'est enregistré.
 - [ ] AC5 — Un combat log sans aucun combat de boss est refusé avec le message « aucun combat de boss trouvé », et rien n'est enregistré.
 - [ ] AC6 — Un log n'est visible que par son propriétaire : un autre utilisateur connecté qui ouvre son adresse obtient « introuvable ».
-- [ ] AC7 — Un log réel de plusieurs centaines de Mo est traité jusqu'au bout et ses combats sont listés.
+- [ ] AC7 — Un log réel d'au moins 1 Go est traité jusqu'au bout et ses combats sont listés.
 
 ### Dependencies
 s01-sign-up-sign-in.
@@ -165,7 +166,7 @@ Source: docs/prd.md
 - [ ] AC4 — Un buff retiré puis réappliqué a pour temps de présence la somme de ses périodes actives.
 
 ### Dependencies
-s02-upload-log-list-fights.
+s06-player-spell-breakdown (vue d'un joueur sur la page du combat).
 
 ### Agentic notes
 - Événements `SPELL_AURA_APPLIED`, `SPELL_AURA_REMOVED`, `SPELL_AURA_REFRESH`, et cumuls (`…_DOSE`).
@@ -201,7 +202,7 @@ Source: docs/prd.md
 2
 
 ### Acceptance criteria
-- [ ] AC1 — « Mes logs » liste mes logs du plus récent au plus ancien, avec leur date et leur nombre de combats.
+- [ ] AC1 — La page « Mes logs », créée en s02, liste mes logs du plus récent au plus ancien, avec leur date et leur nombre de combats.
 - [ ] AC2 — Pour un boss et une difficulté, mes essais successifs s'affichent avec mon chiffre clé et l'écart avec l'essai précédent.
 - [ ] AC3 — Le chiffre clé est le HPS si mon personnage avait une spécialisation de soigneur sur ce combat, sinon le DPS.
 - [ ] AC4 — Seuls les essais de mon personnage (choisi en s03) apparaissent.
@@ -268,9 +269,10 @@ Source: docs/prd.md
 
 ### Acceptance criteria
 - [ ] AC1 — Le réglage « autoriser la comparaison avec mes combats » est désactivé par défaut.
-- [ ] AC2 — Sur un de mes combats, je vois mon chiffre clé comparé à celui des joueurs ayant donné leur accord, sur le même boss, la même difficulté et la même spécialisation.
-- [ ] AC3 — Les combats d'un joueur qui n'a pas donné son accord n'apparaissent jamais dans une comparaison.
-- [ ] AC4 — Quand un joueur retire son accord, ses combats disparaissent aussitôt des comparaisons.
+- [ ] AC2 — Je peux activer ou désactiver ce réglage depuis les paramètres de mon compte.
+- [ ] AC3 — Sur un de mes combats, je vois mon chiffre clé comparé à celui des joueurs ayant donné leur accord, sur le même boss, la même difficulté et la même spécialisation.
+- [ ] AC4 — Les combats d'un joueur qui n'a pas donné son accord n'apparaissent jamais dans une comparaison.
+- [ ] AC5 — Quand un joueur retire son accord, ses combats disparaissent aussitôt des comparaisons.
 
 ### Dependencies
 s09-boss-progress-history.
@@ -292,9 +294,10 @@ Source: docs/prd.md
 - [ ] AC2 — L'admin voit la liste des utilisateurs : e-mail, date d'inscription, nombre de logs.
 - [ ] AC3 — Un compte désactivé par l'admin ne peut plus se connecter ; le réactiver rétablit l'accès.
 - [ ] AC4 — Aucun utilisateur ne peut se donner lui-même le rôle admin depuis le site.
+- [ ] AC5 — Tant qu'un compte est désactivé, les appels de son assistant IA sont refusés.
 
 ### Dependencies
-s01-sign-up-sign-in, s02-upload-log-list-fights.
+s01-sign-up-sign-in, s02-upload-log-list-fights, s10-connect-ai-assistant.
 
 ### Agentic notes
 - **Risque (4)** : droits. Chaque action admin est vérifiée côté serveur, pas seulement masquée à l'écran.
@@ -314,7 +317,7 @@ Source: docs/prd.md
 - [ ] AC3 — Un utilisateur qui n'est pas admin ne peut pas supprimer le log d'un autre.
 
 ### Dependencies
-s13-admin-manage-users.
+s10-connect-ai-assistant, s12-compare-with-opt-in, s13-admin-manage-users.
 
 ### Agentic notes
 - Supprimer aussi les combats et conseils rattachés au log.
@@ -333,7 +336,7 @@ Source: docs/prd.md
 - [ ] AC3 — L'e-mail du compte supprimé peut servir à créer un nouveau compte.
 
 ### Dependencies
-s01-sign-up-sign-in, s02-upload-log-list-fights.
+s01-sign-up-sign-in, s02-upload-log-list-fights, s10-connect-ai-assistant, s11-ai-advice-on-fight, s12-compare-with-opt-in.
 
 ### Agentic notes
 - Vérifier, au moment de son exécution, que toutes les données créées par les stories déjà livrées sont couvertes.
@@ -341,13 +344,13 @@ s01-sign-up-sign-in, s02-upload-log-list-fights.
 ## Story s16-compare-with-top-players — Me comparer aux meilleurs joueurs de ma spé
 Source: docs/prd.md
 
-**As a** joueur **I want** comparer mon combat aux meilleurs joueurs de ma spécialisation sur le même boss **so that** mon assistant IA et moi voyions ce qu'ils font de mieux.
+**As a** joueur **I want** comparer mon combat aux meilleurs joueurs de ma spécialisation sur le même boss **so that** mon assistant IA et moi connaissions mon écart avec les meilleurs.
 
 ### Complexity
 4
 
 ### Acceptance criteria
-- [ ] AC1 — Sur un de mes combats, mon chiffre clé s'affiche à côté de celui des meilleurs joueurs de ma spécialisation sur le même boss et la même difficulté, d'après Warcraft Logs.
+- [ ] AC1 — Sur un de mes combats, mon chiffre clé s'affiche à côté de celui des 10 meilleurs joueurs de ma spécialisation sur le même boss et la même difficulté, d'après Warcraft Logs.
 - [ ] AC2 — Si Warcraft Logs ne répond pas ou refuse l'appel, un message clair s'affiche et le reste de la page du combat fonctionne normalement.
 - [ ] AC3 — L'outil de l'assistant IA « comparer aux meilleurs » renvoie cette comparaison pour un de mes combats, et « introuvable » pour le combat d'un autre joueur.
 - [ ] AC4 — La clé d'accès à l'API Warcraft Logs n'apparaît jamais dans le dépôt, dans les pages du site ni dans les réponses à l'assistant.
@@ -357,5 +360,6 @@ s09-boss-progress-history, s10-connect-ai-assistant.
 
 ### Agentic notes
 - **Risque (4)** : dépendance externe. Conditions d'utilisation, limites d'appels et accès (clé gratuite) de l'API Warcraft Logs à vérifier en recherche ; ne pas rappeler l'API à chaque affichage si ses limites l'interdisent.
+- **Critère d'arrêt de la recherche** : si les conditions d'utilisation de l'API Warcraft Logs interdisent cet usage, la story s'arrête ; elle sort du périmètre et une autre intégration externe est choisie (PRD, contraintes).
 - Brique « intégration externe » exigée par la formation.
 - Hors périmètre : tout autre usage de l'API (import de rapports, classements).
