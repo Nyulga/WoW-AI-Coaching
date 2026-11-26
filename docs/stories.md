@@ -402,7 +402,7 @@ Source: docs/prd.md
 - [ ] AC1 — Sans abonnement, l'outil « lire le résumé d'un combat » répond normalement pour 3 combats différents dans la même semaine.
 - [ ] AC2 — Sans abonnement, la lecture d'un 4ᵉ combat différent dans la même semaine est refusée avec un message qui indique la limite atteinte, la date de remise à zéro et comment s'abonner.
 - [ ] AC3 — Relire un combat déjà lu dans la même semaine ne compte pas comme un nouveau coaching.
-- [ ] AC4 — Le compteur repart à zéro chaque lundi à 0 h, heure de Paris.
+- [ ] AC4 — Le compteur repart à zéro chaque mercredi à 0 h, heure de Paris.
 - [ ] AC5 — L'outil « lister mes combats » n'est jamais limité.
 - [ ] AC6 — La page « Brancher mon assistant IA » affiche le nombre de coachings restants cette semaine.
 
@@ -413,7 +413,7 @@ s10-connect-ai-assistant.
 - Un coaching = l'assistant IA lit le résumé d'un combat (PRD). Le compteur se vérifie côté serveur, à chaque appel de l'outil : jamais côté assistant.
 - Le message de refus est lu par une IA puis montré au joueur : court, clair, sans détail technique.
 - La limite (3) et le début de semaine sont à un seul endroit, pour pouvoir les changer sans toucher la logique.
-- Les tests fixent l'heure (pas d'horloge réelle) pour vérifier la remise à zéro du lundi.
+- Les tests fixent l'heure (pas d'horloge réelle) pour vérifier la remise à zéro du mercredi.
 
 ## Story s19-subscribe — M'abonner pour un coaching illimité
 Source: docs/prd.md
