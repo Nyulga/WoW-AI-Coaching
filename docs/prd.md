@@ -12,6 +12,9 @@ Joueurs qui progressent et utilisent déjà un assistant IA (Claude, ChatGPT…)
 du donjon Mythique+ sur WoW Retail, veulent s'améliorer, mais ne savent pas interpréter un combat
 log seuls. Le site les guide pour brancher leur assistant IA.
 
+Premier utilisateur réel : le porteur du projet en personne — joueur WoW Retail qui veut
+progresser et utilise déjà un assistant IA.
+
 ### Hypothesis to verify
 Un joueur qui suit les conseils de son assistant IA, branché sur le site, améliore son chiffre clé (DPS ou HPS) entre deux logs
 du même boss.
@@ -26,7 +29,8 @@ Non vérifiée avant de construire.
 ## Reference
 - Warcraft Logs — site où l'on envoie son fichier de combat log pour voir en détail dégâts, soins,
   buffs et debuffs. On n'en reprend pas : les classements mondiaux (rankings / parses), le replay
-  visuel du combat, l'envoi en direct (live logging).
+  visuel du combat, l'envoi en direct (live logging). On utilise son API uniquement pour comparer
+  un combat aux meilleurs joueurs de la même spécialisation.
 - WoWAnalyzer — analyse automatique d'un log avec suggestions. On en reprend l'idée d'analyse ;
   le coaching passe ici par l'assistant IA du joueur, branché sur le site.
 
@@ -41,6 +45,7 @@ Non vérifiée avant de construire.
 | Historique de mes logs et progression sur un même boss | 2 | Liste et comparaison simples ; nécessaire pour mesurer l'hypothèse |
 | Accès MCP pour l'assistant IA du joueur : il lit le résumé de ses combats, renvoie des conseils concrets, que le site affiche et garde dans l'historique | 4 | Intégration externe (serveur MCP) avec connexion par compte ; c'est le cœur de la valeur |
 | Comparaison avec d'autres utilisateurs du site sur le même boss, uniquement entre joueurs qui ont donné leur accord (opt-in) | 3 | Logique de comparaison entre joueurs et réglage d'accord par joueur |
+| Comparaison de mon combat aux meilleurs joueurs de ma spécialisation sur le même boss, via l'API Warcraft Logs (affichée sur le site et lisible par l'assistant IA) | 4 | Intégration d'une API tierce, conditions d'utilisation et disponibilité à vérifier ; apporte au coaching ce que font les meilleurs |
 
 Scale: 1 trivial CRUD · 2 form + persistence + list · 3 business logic / several states · 4 integrations, payments, roles · 5 real-time, migrations, external systems. A 5 is an out-of-scope candidate — keep it only if it IS the core value.
 
@@ -48,7 +53,8 @@ Scale: 1 trivial CRUD · 2 form + persistence + list · 3 business logic / sever
 - Classements mondiaux (rankings / parses en percentiles)
 - Replay visuel du combat (carte animée des positions)
 - Envoi des logs en direct pendant le raid (live logging)
-- API Warcraft Logs (comparaison avec des logs externes) — repoussée à une version 2
+- Tout autre usage de l'API Warcraft Logs que la comparaison aux meilleurs joueurs de sa
+  spécialisation (import de rapports, classements, etc.) — repoussé à une version 2
 - Versions du jeu autres que Retail (Classic, etc.)
 - Paiement, abonnement, offre premium — dont l'abonnement qui réservera plus tard l'accès MCP aux abonnés
 - IA payée ou hébergée par le site : l'analyse est faite par l'assistant IA du joueur
@@ -67,6 +73,7 @@ et l'historique montre si ça a marché.
 - RGPD : comptes avec e-mail d'utilisateurs européens — données personnelles protégées, droit de
   suppression du compte. Les combats d'un joueur ne sont visibles par d'autres utilisateurs qu'avec
   son accord explicite (opt-in), qu'il peut retirer à tout moment.
+- Dépendance : accès à l'API Warcraft Logs (clé d'accès, conditions d'utilisation, limites d'appels).
 
 ## Success criteria
 - Tout le périmètre « In scope » est livré et fonctionne en production.

@@ -3,6 +3,10 @@
 > One story = one shippable slice, written to be executed by an agent.
 > Id format: `s<number>-<short-slug>` — reused in every pipeline file and in the branch name.
 
+**Lot initial livrable seul** (première boucle de valeur, jusqu'au coaching) : s01, s02, s03, s04,
+s05, s10, s11. s10 dépend aussi de s06, s07, s08 : soit ces stories rejoignent le lot, soit le
+résumé lu par l'assistant se limite d'abord aux dégâts et soins — à trancher en revue des stories.
+
 Pièges communs à toutes les stories qui lisent un log :
 - **Dépôt GitHub public** : un vrai combat log contient les noms de vrais personnages. Ne jamais
   committer un log réel ; les tests utilisent de courts extraits avec des noms fictifs.
@@ -333,3 +337,25 @@ s01-sign-up-sign-in, s02-upload-log-list-fights.
 
 ### Agentic notes
 - Vérifier, au moment de son exécution, que toutes les données créées par les stories déjà livrées sont couvertes.
+
+## Story s16-compare-with-top-players — Me comparer aux meilleurs joueurs de ma spé
+Source: docs/prd.md
+
+**As a** joueur **I want** comparer mon combat aux meilleurs joueurs de ma spécialisation sur le même boss **so that** mon assistant IA et moi voyions ce qu'ils font de mieux.
+
+### Complexity
+4
+
+### Acceptance criteria
+- [ ] AC1 — Sur un de mes combats, mon chiffre clé s'affiche à côté de celui des meilleurs joueurs de ma spécialisation sur le même boss et la même difficulté, d'après Warcraft Logs.
+- [ ] AC2 — Si Warcraft Logs ne répond pas ou refuse l'appel, un message clair s'affiche et le reste de la page du combat fonctionne normalement.
+- [ ] AC3 — L'outil de l'assistant IA « comparer aux meilleurs » renvoie cette comparaison pour un de mes combats, et « introuvable » pour le combat d'un autre joueur.
+- [ ] AC4 — La clé d'accès à l'API Warcraft Logs n'apparaît jamais dans le dépôt, dans les pages du site ni dans les réponses à l'assistant.
+
+### Dependencies
+s09-boss-progress-history, s10-connect-ai-assistant.
+
+### Agentic notes
+- **Risque (4)** : dépendance externe. Conditions d'utilisation, limites d'appels et accès (clé gratuite) de l'API Warcraft Logs à vérifier en recherche ; ne pas rappeler l'API à chaque affichage si ses limites l'interdisent.
+- Brique « intégration externe » exigée par la formation.
+- Hors périmètre : tout autre usage de l'API (import de rapports, classements).
