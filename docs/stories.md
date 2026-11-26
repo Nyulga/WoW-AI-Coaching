@@ -389,3 +389,105 @@ s09-boss-progress-history, s10-connect-ai-assistant.
 - Brique « intégration externe » exigée par la formation.
 - Hors périmètre : tout autre usage de l'API (import de rapports, classements).
 - Toute donnée gardée qui est liée à un joueur ou à un combat (par ex. une copie des réponses Warcraft Logs) est supprimée avec le compte (s15) et avec le log (s14).
+
+## Story s18-ai-coaching-weekly-limit — Limiter le coaching gratuit à 3 par semaine
+Source: docs/prd.md
+
+**As a** joueur sans abonnement **I want** pouvoir faire 3 coachings par semaine avec mon assistant IA **so that** j'essaie le coaching avant de décider de m'abonner.
+
+### Complexity
+3
+
+### Acceptance criteria
+- [ ] AC1 — Sans abonnement, l'outil « lire le résumé d'un combat » répond normalement pour 3 combats différents dans la même semaine.
+- [ ] AC2 — Sans abonnement, la lecture d'un 4ᵉ combat différent dans la même semaine est refusée avec un message qui indique la limite atteinte, la date de remise à zéro et comment s'abonner.
+- [ ] AC3 — Relire un combat déjà lu dans la même semaine ne compte pas comme un nouveau coaching.
+- [ ] AC4 — Le compteur repart à zéro chaque lundi à 0 h, heure de Paris.
+- [ ] AC5 — L'outil « lister mes combats » n'est jamais limité.
+- [ ] AC6 — La page « Brancher mon assistant IA » affiche le nombre de coachings restants cette semaine.
+
+### Dependencies
+s10-connect-ai-assistant.
+
+### Agentic notes
+- Un coaching = l'assistant IA lit le résumé d'un combat (PRD). Le compteur se vérifie côté serveur, à chaque appel de l'outil : jamais côté assistant.
+- Le message de refus est lu par une IA puis montré au joueur : court, clair, sans détail technique.
+- La limite (3) et le début de semaine sont à un seul endroit, pour pouvoir les changer sans toucher la logique.
+- Les tests fixent l'heure (pas d'horloge réelle) pour vérifier la remise à zéro du lundi.
+
+## Story s19-subscribe — M'abonner pour un coaching illimité
+Source: docs/prd.md
+
+**As a** joueur **I want** m'abonner à 5 € par mois par carte bancaire **so that** mon assistant IA me coache sans limite.
+
+### Complexity
+4
+
+### Acceptance criteria
+- [ ] AC1 — Depuis mon compte, « S'abonner » ouvre le paiement par carte de 5 € par mois ; un paiement réussi rend mon compte abonné.
+- [ ] AC2 — Un compte abonné n'a pas de limite : la lecture d'un 4ᵉ combat différent dans la même semaine est servie.
+- [ ] AC3 — Un paiement abandonné ou refusé laisse le compte sans abonnement, limité à 3 coachings par semaine.
+- [ ] AC4 — Le compte ne devient abonné que sur une confirmation de Stripe reçue et vérifiée par le serveur ; une confirmation dont la signature est invalide est rejetée et ne change rien.
+- [ ] AC5 — Une même confirmation de Stripe reçue deux fois ne crée qu'un seul abonnement.
+- [ ] AC6 — La page de mon compte indique que je suis abonné et la date du prochain paiement.
+- [ ] AC7 — La page d'abonnement indique que l'abonnement à l'assistant IA lui-même n'est pas compris.
+
+### Dependencies
+s01-sign-up-sign-in, s18-ai-coaching-weekly-limit.
+
+### Agentic notes
+- **Risque (4)** : paiement. Le retour du navigateur après paiement ne prouve rien : seule la notification signée de Stripe (webhook) rend un compte abonné. Stripe peut envoyer la même notification plusieurs fois.
+- Page de paiement fournie par Stripe (aucune donnée de carte ne passe par le site ni n'y est stockée, PRD). Le produit exact de Stripe (Checkout, Billing) se fixe en recherche.
+- Développement et tests en mode test de Stripe uniquement ; les clés vont dans `.env.local`, jamais dans le dépôt ni dans les pages.
+- Ouvrir l'abonnement au public demande un statut légal réglé avant (PRD, contraintes) : ce n'est pas un critère de cette story, mais un prérequis de sa mise en production publique.
+
+## Story s20-manage-subscription — Gérer et résilier mon abonnement
+Source: docs/prd.md
+
+**As a** abonné **I want** gérer ma carte, voir mes factures et résilier mon abonnement **so that** je garde le contrôle de ce que je paie.
+
+### Complexity
+4
+
+### Acceptance criteria
+- [ ] AC1 — Depuis mon compte, j'ouvre la gestion de mon abonnement : changer de carte, voir mes factures, résilier.
+- [ ] AC2 — Après une résiliation, le compte reste abonné jusqu'à la fin de la période payée, puis revient à 3 coachings par semaine.
+- [ ] AC3 — Un renouvellement mensuel réussi prolonge l'abonnement d'un mois sans action du joueur.
+- [ ] AC4 — Un renouvellement refusé affiche un avertissement sur la page de mon compte ; si Stripe abandonne l'abonnement faute de paiement, le compte revient à 3 coachings par semaine.
+- [ ] AC5 — La suppression d'un compte abonné (s15) résilie aussitôt son abonnement : plus aucun paiement n'est prélevé.
+
+### Dependencies
+s15-delete-my-account, s19-subscribe.
+
+### Agentic notes
+- **Risque (4)** : paiement récurrent. Chaque changement d'état (renouvellement, échec, résiliation, fin) arrive par une notification signée de Stripe ; mêmes pièges qu'en s19 (signature, doublons, ordre d'arrivée).
+- Espace de gestion fourni par Stripe (portail client) plutôt que des écrans maison : à confirmer en recherche.
+- Les relances de Stripe après un échec de paiement (délais, nombre d'essais) se lisent dans sa configuration, en recherche.
+- Hors PRD : remboursement, changement de prix, plusieurs niveaux d'abonnement.
+
+## Story s21-share-fight-discord — Partager un combat sur Discord
+Source: docs/prd.md
+
+**As a** joueur **I want** publier mon combat dans un salon Discord **so that** ma guilde voie mon chiffre clé, ma progression et le conseil reçu.
+
+### Complexity
+3
+
+### Acceptance criteria
+- [ ] AC1 — Dans mes paramètres, j'enregistre l'adresse de webhook d'un salon Discord ; une adresse qui n'est pas un webhook Discord est refusée avec un message.
+- [ ] AC2 — Sur un de mes combats, « Partager sur Discord » publie dans ce salon : boss, difficulté, résultat, mon chiffre clé, l'écart avec mon essai précédent et le dernier conseil reçu.
+- [ ] AC3 — Le message publié ne contient ni mon e-mail ni les chiffres des autres joueurs.
+- [ ] AC4 — Un conseil qui contient une mention Discord (`@everyone`, `@here`, un rôle ou un membre) est publié sans notifier personne.
+- [ ] AC5 — Si Discord ne répond pas ou refuse le message, un message clair s'affiche et le reste de la page du combat fonctionne normalement.
+- [ ] AC6 — Partager le combat d'un autre joueur est refusé.
+- [ ] AC7 — Sans adresse de webhook enregistrée, le bouton invite à en configurer une.
+
+### Dependencies
+s09-boss-progress-history, s11-ai-advice-on-fight.
+
+### Agentic notes
+- Webhook Discord : l'adresse se crée dans les paramètres du salon (Intégrations). Pas de bot, pas de connexion à un compte Discord (hors périmètre, PRD).
+- L'adresse du webhook est un secret (quiconque la connaît peut publier) : ne jamais la réafficher en entier, ne jamais la journaliser.
+- Accepter uniquement les adresses de Discord (`discord.com/api/webhooks/…`) : le serveur ne doit jamais appeler une autre adresse donnée par l'utilisateur.
+- Le conseil vient d'une IA externe (s11) : donnée non fiable. Limite de longueur d'un message Discord (2 000 caractères) : tronquer le conseil.
+- L'adresse du webhook est supprimée avec le compte (s15).
