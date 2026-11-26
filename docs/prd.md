@@ -54,6 +54,8 @@ Non vérifiée avant de construire.
 | Accès MCP pour l'assistant IA du joueur : il lit le résumé de ses combats, renvoie des conseils concrets, que le site affiche et garde dans l'historique | 4 | Intégration externe (serveur MCP) avec connexion par compte ; c'est le cœur de la valeur |
 | Comparaison avec d'autres utilisateurs du site sur le même boss, uniquement entre joueurs qui ont donné leur accord (opt-in) | 3 | Logique de comparaison entre joueurs et réglage d'accord par joueur |
 | Comparaison de mon combat aux meilleurs joueurs de ma spécialisation sur le même boss, via l'API Warcraft Logs (affichée sur le site et lisible par l'assistant IA) | 4 | Intégration d'une API tierce, conditions d'utilisation et disponibilité à vérifier ; apporte au coaching ce que font les meilleurs |
+| Abonnement : 5 € par mois pour un coaching IA illimité ; sans abonnement, 3 coachings par semaine (un coaching = l'assistant IA lit le résumé d'un combat ; lister ses combats reste gratuit et illimité). L'abonnement à l'assistant IA lui-même n'est pas compris | 4 | Paiement par carte via un prestataire externe, abonnement récurrent (résiliation, paiement refusé), limite hebdomadaire à compter |
+| Partage sur Discord : depuis la page d'un combat, publier dans un salon Discord choisi son chiffre clé, sa progression et le dernier conseil de l'assistant IA | 3 | Envoi d'un message vers Discord, sans bot ; règle de ce qui est partagé et message clair si Discord ne répond pas |
 
 Scale: 1 trivial CRUD · 2 form + persistence + list · 3 business logic / several states · 4 integrations, payments, roles · 5 real-time, migrations, external systems. A 5 is an out-of-scope candidate — keep it only if it IS the core value.
 
@@ -64,10 +66,10 @@ Scale: 1 trivial CRUD · 2 form + persistence + list · 3 business logic / sever
 - Tout autre usage de l'API Warcraft Logs que la comparaison aux meilleurs joueurs de sa
   spécialisation (import de rapports, classements, etc.) — repoussé à une version 2
 - Versions du jeu autres que Retail (Classic, etc.)
-- Paiement, abonnement, offre premium — dont l'abonnement qui réservera plus tard l'accès MCP aux abonnés
+- Autres offres payantes : plusieurs niveaux d'abonnement, paiement à l'unité, autres moyens de paiement que la carte
 - IA payée ou hébergée par le site : l'analyse est faite par l'assistant IA du joueur
 - Application mobile (iOS / Android)
-- Bot Discord et partage automatique vers d'autres plateformes
+- Bot Discord (commandes dans Discord, liaison d'un compte Discord) et partage vers d'autres plateformes que Discord
 - Gestion de guilde (roster, inscriptions aux raids, gestion d'équipe)
 
 ### Differentiation
@@ -88,6 +90,13 @@ et l'historique montre si ça a marché.
 - Dépendance : accès à l'API Warcraft Logs (clé d'accès, conditions d'utilisation, limites d'appels).
   Si ses conditions d'utilisation interdisent notre usage, la comparaison aux meilleurs joueurs sort
   du périmètre et une autre intégration externe est choisie.
+- Paiement : par carte, via Stripe. Le site ne stocke jamais de données de carte bancaire : Stripe les garde.
+- Statut légal : encaisser de l'argent demande un statut (par exemple une micro-entreprise), réglé avant
+  d'ouvrir l'abonnement au public.
+- Budget du paiement : les frais de Stripe sont prélevés sur chaque abonnement (environ 0,33 € sur 5 €,
+  montant à vérifier).
+- Dépendance : le partage dépend du service Discord ; s'il ne répond pas, un message clair s'affiche et
+  le reste du site fonctionne normalement.
 
 ## Success criteria
 - Tout le périmètre « In scope » est livré et fonctionne en production.
