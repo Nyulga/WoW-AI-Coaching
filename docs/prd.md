@@ -37,7 +37,7 @@ Non vérifiée avant de construire.
 | Comptes utilisateur : inscription, connexion | 2 | Formulaire et enregistrement classiques |
 | Comptes administrateurs : gérer les utilisateurs et les logs | 4 | Rôles et droits distincts ; gardé pour protéger un site public |
 | Envoi et lecture du fichier combat log officiel de WoW Retail | 5 | Format externe, fichiers très volumineux ; gardé car c'est la base de toute la valeur |
-| Vue détaillée d'un combat : dégâts, soins, buffs/debuffs, graphiques | 3 | Nombreux calculs et plusieurs vues |
+| Vue détaillée d'un combat : dégâts, soins, buffs/debuffs, graphiques | 4 | Nombreux types d'événements, rattachement des familiers à leur joueur, absorptions et surplus de soin, graphiques dans le temps |
 | Historique de mes logs et progression sur un même boss | 2 | Liste et comparaison simples ; nécessaire pour mesurer l'hypothèse |
 | Accès MCP pour l'assistant IA du joueur : il lit le résumé de ses combats, renvoie des conseils concrets, que le site affiche et garde dans l'historique | 4 | Intégration externe (serveur MCP) avec connexion par compte ; c'est le cœur de la valeur |
 | Comparaison avec d'autres utilisateurs du site sur le même boss | 3 | Logique de comparaison entre joueurs |
