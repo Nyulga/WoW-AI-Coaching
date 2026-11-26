@@ -3,7 +3,8 @@
 > One story = one shippable slice, written to be executed by an agent.
 > Id format: `s<number>-<short-slug>` — reused in every pipeline file and in the branch name.
 
-**Lot initial livrable seul** (première boucle de valeur, jusqu'au coaching) : s01 à s11.
+**Lot initial livrable seul** (première boucle de valeur, jusqu'au coaching) : s01 à s11, plus s17
+(placée juste après s04, pour qu'aucun chiffre ne soit affiché sans contrôle de version).
 
 La mesure du signal de l'hypothèse (10 joueurs, 70 %, 30 jours) se fait hors produit, par une
 requête directe sur les données : aucune story ne l'affiche.
@@ -56,13 +57,13 @@ Source: docs/prd.md
 - [ ] AC4 — Un combat log d'une autre version du jeu que Retail est refusé avec un message clair, et rien n'est enregistré.
 - [ ] AC5 — Un combat log sans aucun combat de boss est refusé avec le message « aucun combat de boss trouvé », et rien n'est enregistré.
 - [ ] AC6 — Un log n'est visible que par son propriétaire : un autre utilisateur connecté qui ouvre son adresse obtient « introuvable ».
-- [ ] AC7 — Un log réel d'au moins 1 Go est traité jusqu'au bout et ses combats sont listés.
+- [ ] AC7 — Un log d'au moins 1 Go, généré par le test en répétant un extrait fictif, est traité jusqu'au bout et ses combats sont listés.
 
 ### Dependencies
 s01-sign-up-sign-in.
 
 ### Agentic notes
-- **Risque (4)** : taille des fichiers et budget. AC7 se vérifie avec un log réel fourni par le porteur, jamais committé.
+- **Risque (4)** : taille des fichiers et budget. AC7 utilise un gros log généré (noms fictifs) ; une vérification manuelle complémentaire avec un vrai log du porteur, jamais committé, est conseillée.
 - Combats de boss repérés par `ENCOUNTER_START` / `ENCOUNTER_END` (boss, difficulté, succès) ; un donjon Mythique+ est encadré par `CHALLENGE_MODE_START` / `CHALLENGE_MODE_END`.
 - Conserver ou non le fichier brut après lecture : décision d'architecture (coût de stockage).
 - Équivalent dans la référence : la liste des combats d'un rapport Warcraft Logs.
@@ -109,6 +110,29 @@ s02-upload-log-list-fights.
 - Types de dégâts : `SWING_DAMAGE`, `SPELL_DAMAGE`, `SPELL_PERIODIC_DAMAGE`, `RANGE_DAMAGE`, ainsi que les cas particuliers (`DAMAGE_SPLIT`, `SPELL_DAMAGE_SUPPORT` de l'Évocateur Augmentation) : règle à fixer en recherche.
 - Classe et spécialisation : `COMBATANT_INFO` en début de combat.
 - Référence : onglet « Damage Done » de Warcraft Logs sur le même log.
+
+## Story s17-patch-compatibility — Savoir avec quel patch les chiffres sont justes
+Source: docs/prd.md
+
+**As a** joueur **I want** savoir avec quel patch du jeu les chiffres du site sont compatibles, et qu'un log non pris en charge soit refusé **so that** je puisse faire confiance aux chiffres affichés.
+
+### Complexity
+2
+
+### Acceptance criteria
+- [ ] AC1 — Chaque page de combat affiche le patch du jeu avec lequel les chiffres du site sont compatibles.
+- [ ] AC2 — Chaque log enregistré garde la version du jeu détectée dans le fichier, affichée sur sa page.
+- [ ] AC3 — Un log Retail dont la version n'est pas prise en charge est refusé avec un message qui indique la version détectée et la version prise en charge, et rien n'est enregistré.
+
+### Dependencies
+s04-fight-damage-by-player.
+
+### Agentic notes
+- Placée juste après s04, avant toute autre story qui affiche des chiffres : son id reste s17 (ids stables), sa place dans la liste suit les dépendances.
+- Version lue dans la première ligne du log : `COMBAT_LOG_VERSION`, `BUILD_VERSION` (et `PROJECT_ID`, déjà utilisé par s02 AC4 pour refuser les versions autres que Retail). Ce que « pris en charge » couvre exactement (version de format, plage de builds) se fixe en recherche.
+- Frontière avec s02 : s02 refuse ce qui n'est pas Retail ; s17 refuse une version Retail non prise en charge.
+- La version prise en charge doit pouvoir changer vite à chaque patch (contrainte « Justesse à chaque patch » du PRD) : la garder à un seul endroit, séparée de la logique de lecture.
+- La vérification à chaque patch (log récent, totaux comparés à Warcraft Logs) est un travail de maintenance (`/ztp-chore`), pas un critère de cette story.
 
 ## Story s05-fight-healing-by-player — Voir les soins de chaque joueur sur un combat
 Source: docs/prd.md
@@ -161,7 +185,7 @@ Source: docs/prd.md
 
 ### Acceptance criteria
 - [ ] AC1 — Pour un joueur, la liste de ses buffs reçus s'affiche avec leur temps de présence en % de la durée du combat.
-- [ ] AC2 — La liste des debuffs que le joueur a posés sur les ennemis s'affiche avec leur temps de présence en %.
+- [ ] AC2 — La liste des debuffs que le joueur a posés sur les ennemis s'affiche avec leur temps de présence en % ; un debuff compte comme présent tant qu'il est actif sur au moins un ennemi (cumul de toutes les cibles).
 - [ ] AC3 — Un buff déjà actif au début du combat est compté depuis le début du combat.
 - [ ] AC4 — Un buff retiré puis réappliqué a pour temps de présence la somme de ses périodes actives.
 
@@ -235,6 +259,7 @@ s03-choose-my-character, s06-player-spell-breakdown, s07-fight-buffs-debuffs, s0
 
 ### Agentic notes
 - **Risque (4)** : sécurité et compatibilité. Connexion par compte d'un serveur MCP distant, prise en charge réelle par les assistants visés (Claude, ChatGPT…) à vérifier en recherche, cloisonnement strict des données entre joueurs.
+- L'assistant ciblé par AC1 (Claude, ChatGPT…) est nommé à `/ztp-architect`, avant le plan de cette story.
 - Le site ne paie aucune IA : il ne fait qu'exposer des outils.
 - Le résumé doit rester court : il est lu par une IA dont la mémoire de travail est limitée.
 
@@ -317,7 +342,7 @@ Source: docs/prd.md
 - [ ] AC3 — Un utilisateur qui n'est pas admin ne peut pas supprimer le log d'un autre.
 
 ### Dependencies
-s10-connect-ai-assistant, s12-compare-with-opt-in, s13-admin-manage-users.
+s10-connect-ai-assistant, s11-ai-advice-on-fight, s12-compare-with-opt-in, s13-admin-manage-users.
 
 ### Agentic notes
 - Supprimer aussi les combats et conseils rattachés au log.
@@ -363,25 +388,4 @@ s09-boss-progress-history, s10-connect-ai-assistant.
 - **Critère d'arrêt de la recherche** : si les conditions d'utilisation de l'API Warcraft Logs interdisent cet usage, la story s'arrête ; elle sort du périmètre et une autre intégration externe est choisie (PRD, contraintes).
 - Brique « intégration externe » exigée par la formation.
 - Hors périmètre : tout autre usage de l'API (import de rapports, classements).
-
-## Story s17-patch-compatibility — Savoir avec quel patch les chiffres sont justes
-Source: docs/prd.md
-
-**As a** joueur **I want** savoir avec quel patch du jeu les chiffres du site sont compatibles, et qu'un log non pris en charge soit refusé **so that** je puisse faire confiance aux chiffres affichés.
-
-### Complexity
-2
-
-### Acceptance criteria
-- [ ] AC1 — Chaque page de combat affiche le patch du jeu avec lequel les chiffres du site sont compatibles.
-- [ ] AC2 — Chaque log enregistré garde la version du jeu détectée dans le fichier, affichée sur sa page.
-- [ ] AC3 — Un log Retail dont la version n'est pas prise en charge est refusé avec un message qui indique la version détectée et la version prise en charge, et rien n'est enregistré.
-
-### Dependencies
-s04-fight-damage-by-player.
-
-### Agentic notes
-- Version lue dans la première ligne du log : `COMBAT_LOG_VERSION`, `BUILD_VERSION` (et `PROJECT_ID`, déjà utilisé par s02 AC4 pour refuser les versions autres que Retail). Ce que « pris en charge » couvre exactement (version de format, plage de builds) se fixe en recherche.
-- Frontière avec s02 : s02 refuse ce qui n'est pas Retail ; s17 refuse une version Retail non prise en charge.
-- La version prise en charge doit pouvoir changer vite à chaque patch (contrainte « Justesse à chaque patch » du PRD) : la garder à un seul endroit, séparée de la logique de lecture.
-- La vérification à chaque patch (log récent, totaux comparés à Warcraft Logs) est un travail de maintenance (`/ztp-chore`), pas un critère de cette story.
+- Toute donnée gardée qui est liée à un joueur ou à un combat (par ex. une copie des réponses Warcraft Logs) est supprimée avec le compte (s15) et avec le log (s14).
