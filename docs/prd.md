@@ -45,6 +45,7 @@ Non vérifiée avant de construire.
 | Feature | Complexity (1-5) | Why this score |
 |---|---|---|
 | Comptes utilisateur : inscription, connexion | 2 | Formulaire et enregistrement classiques |
+| Suppression de mon compte et de toutes mes données | 2 | Confirmation et suppression simples ; obligatoire (RGPD) |
 | Comptes administrateurs : gérer les utilisateurs et les logs | 4 | Rôles et droits distincts ; gardé pour protéger un site public |
 | Envoi et lecture du fichier combat log officiel de WoW Retail | 5 | Format externe, fichiers très volumineux ; gardé car c'est la base de toute la valeur |
 | Vue détaillée d'un combat : dégâts, soins, buffs/debuffs, graphiques | 4 | Nombreux types d'événements, rattachement des familiers à leur joueur, absorptions et surplus de soin, graphiques dans le temps |
