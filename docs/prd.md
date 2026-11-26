@@ -6,6 +6,10 @@ Les joueurs de World of Warcraft (Retail) qui veulent progresser utilisent aujou
 (les chiffres détaillés d'un combat) et WoWAnalyzer (une analyse automatique). Ces outils montrent
 des chiffres, mais n'expliquent pas concrètement quoi changer : il n'y a pas de vrai coaching.
 Le joueur qui ne sait pas lire un log seul reste devant des tableaux sans savoir comment s'améliorer.
+Ce que ça lui coûte aujourd'hui :
+- du temps : à lire ses logs, des guides ou des vidéos sans savoir quoi changer ;
+- des essais ratés : il répète des échecs sur un boss sans comprendre son erreur ;
+- sa place en groupe : des performances faibles le font refuser en groupe ou en raid.
 
 ### Target users
 Joueurs qui progressent et utilisent déjà un assistant IA (Claude, ChatGPT…) : ils font du raid ou
@@ -16,10 +20,12 @@ Premier utilisateur réel : le porteur du projet en personne — joueur WoW Reta
 progresser et utilise déjà un assistant IA.
 
 ### Hypothesis to verify
-Un joueur qui suit les conseils de son assistant IA, branché sur le site, améliore son chiffre clé (DPS ou HPS) entre deux logs
-du même boss.
-Signal mesurable : parmi au moins 10 joueurs qui envoient 2 logs du même boss après avoir lu les
-conseils, au moins 70 % améliorent leur chiffre clé.
+Un joueur (hors tank) qui a reçu un conseil de son assistant IA sur un essai améliore son chiffre
+clé (DPS ou HPS) d'au moins 5 % sur un essai suivant du même boss et de la même difficulté, dans
+les 30 jours.
+Signal mesurable : parmi au moins 10 joueurs (hors tanks) ayant un conseil enregistré sur un
+premier essai puis un second essai du même boss et de la même difficulté dans les 30 jours, au
+moins 70 % améliorent leur chiffre clé d'au moins 5 %.
 Non vérifiée avant de construire.
 
 ## Starting point
@@ -74,8 +80,12 @@ et l'historique montre si ça a marché.
   suppression du compte. Les combats d'un joueur ne sont visibles par d'autres utilisateurs qu'avec
   son accord explicite (opt-in), qu'il peut retirer à tout moment.
 - Dépendance : accès à l'API Warcraft Logs (clé d'accès, conditions d'utilisation, limites d'appels).
+  Si ses conditions d'utilisation interdisent notre usage, la comparaison aux meilleurs joueurs sort
+  du périmètre et une autre intégration externe est choisie.
 
 ## Success criteria
 - Tout le périmètre « In scope » est livré et fonctionne en production.
-- Signal de l'hypothèse : au moins 10 joueurs envoient 2 logs du même boss après avoir lu les
-  conseils de leur assistant IA, et au moins 70 % d'entre eux améliorent leur chiffre clé (DPS ou HPS).
+- Signal de l'hypothèse : au moins 10 joueurs (hors tanks) ont un conseil enregistré sur un premier
+  essai puis un second essai du même boss et de la même difficulté dans les 30 jours, et au moins
+  70 % d'entre eux améliorent leur chiffre clé (DPS ou HPS) d'au moins 5 %.
+- Testeurs recrutés dans la guilde du porteur du projet et sur des serveurs Discord WoW.
