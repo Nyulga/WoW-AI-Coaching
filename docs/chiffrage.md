@@ -56,4 +56,5 @@ Complexité revue : s13-admin-manage-users passée de 4 à 3 (un seul rôle admi
 Ajout au périmètre (PRD `9a95e5f`) : abonnement (s18, s19, s20) et partage Discord (s21) · +19 j sans IA, +7,5 j avec IA (grille actuelle).
 
 Prix client : 10 000 € (forfait de 40 j × TJM 250 €, entre 8 875 € et 21 625 €) · sous la valeur sans IA pour rester attractif, au-dessus du coût réel pour couvrir les risques connus : justesse des chiffres, patchs du jeu, conditions d'utilisation de l'API Warcraft Logs.
+Seuil de rentabilité (si je vends le site moi-même) : 5 € − ≈ 0,33 € de frais Stripe (à vérifier) ≈ 4,67 € par abonné et par mois · coût réel avec IA 8 875 € ÷ 4,67 € ≈ 1 900 mois d'abonnement (ex. 160 abonnés pendant 1 an) · hébergement mensuel non compté.
 Recalcul à l'aveugle (jours-homme sans IA) : 81 j pour les 21 stories, Fondation exclue (contexte neuf, 2026-11-26), contre 57 j avec l'ancienne grille (2 → 1 j, 3 → 2 j, 4 → 5 j) : écart +42 %, hors tolérance · grille relevée à 2 / 3 / 6,5 j : 81,5 j · écart : +0,6 %, dans la tolérance (10 %)
