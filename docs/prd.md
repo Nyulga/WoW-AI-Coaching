@@ -54,7 +54,7 @@ Non vérifiée avant de construire.
 | Accès MCP pour l'assistant IA du joueur : il lit le résumé de ses combats, renvoie des conseils concrets, que le site affiche et garde dans l'historique | 4 | Intégration externe (serveur MCP) avec connexion par compte ; c'est le cœur de la valeur |
 | Comparaison avec d'autres utilisateurs du site sur le même boss, uniquement entre joueurs qui ont donné leur accord (opt-in) | 3 | Logique de comparaison entre joueurs et réglage d'accord par joueur |
 | Comparaison de mon combat aux meilleurs joueurs de ma spécialisation sur le même boss, via l'API Warcraft Logs (affichée sur le site et lisible par l'assistant IA) | 4 | Intégration d'une API tierce, conditions d'utilisation et disponibilité à vérifier ; apporte au coaching ce que font les meilleurs |
-| Abonnement : 5 € par mois pour un coaching IA illimité ; sans abonnement, 3 coachings par semaine (un coaching = l'assistant IA lit le résumé d'un combat ; lister ses combats reste gratuit et illimité). L'abonnement à l'assistant IA lui-même n'est pas compris | 4 | Paiement par carte via un prestataire externe, abonnement récurrent (résiliation, paiement refusé), limite hebdomadaire à compter |
+| Abonnement : 5,99 € par mois pour un coaching IA illimité ; sans abonnement, 3 coachings par semaine (un coaching = l'assistant IA lit le résumé d'un combat ; lister ses combats reste gratuit et illimité). L'abonnement à l'assistant IA lui-même n'est pas compris | 4 | Paiement par carte via un prestataire externe, abonnement récurrent (résiliation, paiement refusé), limite hebdomadaire à compter |
 | Partage sur Discord : depuis la page d'un combat, publier dans un salon Discord choisi son chiffre clé, sa progression et le dernier conseil de l'assistant IA | 3 | Envoi d'un message vers Discord, sans bot ; règle de ce qui est partagé et message clair si Discord ne répond pas |
 
 Scale: 1 trivial CRUD · 2 form + persistence + list · 3 business logic / several states · 4 integrations, payments, roles · 5 real-time, migrations, external systems. A 5 is an out-of-scope candidate — keep it only if it IS the core value.
@@ -93,7 +93,7 @@ et l'historique montre si ça a marché.
 - Paiement : par carte, via Stripe. Le site ne stocke jamais de données de carte bancaire : Stripe les garde.
 - Statut légal : encaisser de l'argent demande un statut (par exemple une micro-entreprise), réglé avant
   d'ouvrir l'abonnement au public.
-- Budget du paiement : les frais de Stripe sont prélevés sur chaque abonnement (environ 0,33 € sur 5 €,
+- Budget du paiement : les frais de Stripe sont prélevés sur chaque abonnement (environ 0,34 € sur 5,99 €,
   montant à vérifier).
 - Dépendance : le partage dépend du service Discord ; s'il ne répond pas, un message clair s'affiche et
   le reste du site fonctionne normalement.

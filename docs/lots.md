@@ -22,7 +22,7 @@ mon combat et me conseille → le conseil reste sur le site → je refais le bos
 et je vois ma progression en %.
 
 Autour de cette boucle, le lot livre aussi l'abonnement (3 coachings gratuits par semaine, ou
-illimité à 5 €/mois), la comparaison avec les autres joueurs et avec les meilleurs, et la
+illimité à 5,99 €/mois), la comparaison avec les autres joueurs et avec les meilleurs, et la
 suppression de compte.
 
 ### Stories

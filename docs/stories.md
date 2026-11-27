@@ -419,13 +419,13 @@ s10-connect-ai-assistant.
 ## Story s19-subscribe — M'abonner pour un coaching illimité
 Source: docs/prd.md
 
-**As a** joueur **I want** m'abonner à 5 € par mois par carte bancaire **so that** mon assistant IA me coache sans limite.
+**As a** joueur **I want** m'abonner à 5,99 € par mois par carte bancaire **so that** mon assistant IA me coache sans limite.
 
 ### Complexity
 4
 
 ### Acceptance criteria
-- [ ] AC1 — Depuis mon compte, « S'abonner » ouvre le paiement par carte de 5 € par mois ; un paiement réussi rend mon compte abonné.
+- [ ] AC1 — Depuis mon compte, « S'abonner » ouvre le paiement par carte de 5,99 € par mois ; un paiement réussi rend mon compte abonné.
 - [ ] AC2 — Un compte abonné n'a pas de limite : la lecture d'un 4ᵉ combat différent dans la même semaine est servie.
 - [ ] AC3 — Un paiement abandonné ou refusé laisse le compte sans abonnement, limité à 3 coachings par semaine.
 - [ ] AC4 — Le compte ne devient abonné que sur une confirmation de Stripe reçue et vérifiée par le serveur ; une confirmation dont la signature est invalide est rejetée et ne change rien.
